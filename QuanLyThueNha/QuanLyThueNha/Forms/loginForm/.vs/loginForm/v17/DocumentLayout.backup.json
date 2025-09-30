@@ -1,0 +1,52 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Terrykote\\Desktop\\CNPM\\QLTN_TH2\\QuanLyThueNha\\QuanLyThueNha\\Forms\\loginForm\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D1653175-CB93-4602-93EE-7FFF0B0F4016}|loginForm\\loginForm.csproj|c:\\users\\terrykote\\desktop\\cnpm\\qltn_th2\\quanlythuenha\\quanlythuenha\\forms\\loginform\\loginform\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{D1653175-CB93-4602-93EE-7FFF0B0F4016}|loginForm\\loginForm.csproj|solutionrelative:loginform\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1653175-CB93-4602-93EE-7FFF0B0F4016}|loginForm\\loginForm.csproj|C:\\Users\\Terrykote\\Desktop\\CNPM\\QLTN_TH2\\QuanLyThueNha\\QuanLyThueNha\\Forms\\loginForm\\loginform\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1653175-CB93-4602-93EE-7FFF0B0F4016}|loginForm\\loginForm.csproj|solutionrelative:loginform\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Terrykote\\Desktop\\CNPM\\QLTN_TH2\\QuanLyThueNha\\QuanLyThueNha\\Forms\\loginForm\\loginForm\\Program.cs",
+              "RelativeDocumentMoniker": "loginForm\\Program.cs",
+              "ToolTip": "C:\\Users\\Terrykote\\Desktop\\CNPM\\QLTN_TH2\\QuanLyThueNha\\QuanLyThueNha\\Forms\\loginForm\\loginForm\\Program.cs",
+              "RelativeToolTip": "loginForm\\Program.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAADgvxIAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T17:27:36.933Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\Terrykote\\Desktop\\CNPM\\QLTN_TH2\\QuanLyThueNha\\QuanLyThueNha\\Forms\\loginForm\\loginForm\\Form1.cs",
+              "RelativeDocumentMoniker": "loginForm\\Form1.cs",
+              "ToolTip": "C:\\Users\\Terrykote\\Desktop\\CNPM\\QLTN_TH2\\QuanLyThueNha\\QuanLyThueNha\\Forms\\loginForm\\loginForm\\Form1.cs [Design]",
+              "RelativeToolTip": "loginForm\\Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T16:55:41.06Z",
+              "EditorCaption": " [Design]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\QuanLyThueNha\QuanLyThueNha\Forms\loginForm\loginForm\obj\Debug\loginForm.csproj.AssemblyReference.cache
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\QuanLyThueNha\QuanLyThueNha\Forms\loginForm\loginForm\obj\Debug\loginForm.csproj.CoreCompileInputs.cache
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\QuanLyThueNha\QuanLyThueNha\Forms\loginForm\loginForm\bin\Debug\loginForm.exe.config
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\QuanLyThueNha\QuanLyThueNha\Forms\loginForm\loginForm\bin\Debug\loginForm.exe
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\QuanLyThueNha\QuanLyThueNha\Forms\loginForm\loginForm\bin\Debug\loginForm.pdb
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\QuanLyThueNha\QuanLyThueNha\Forms\loginForm\loginForm\obj\Debug\loginForm.exe
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\QuanLyThueNha\QuanLyThueNha\Forms\loginForm\loginForm\obj\Debug\loginForm.pdb
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\QuanLyThueNha\QuanLyThueNha\Forms\loginForm\loginForm\obj\Debug\loginForm.exe.config

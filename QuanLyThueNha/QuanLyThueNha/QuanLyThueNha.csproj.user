@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Update="Forms\Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MainMenu\frm_MainMenu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\QLHD\frm_addHD.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\QLHD\frm_QLHD.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\QLNT\frm_QLNT.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\QLTS\frm_DKTS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\QLTS\frm_QLP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

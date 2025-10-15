@@ -1,0 +1,10 @@
+C:\Users\Terrykote\Desktop\QLTN\bin\Release\Assets\main-background.png
+C:\Users\Terrykote\Desktop\QLTN\bin\Release\QLTN.exe.config
+C:\Users\Terrykote\Desktop\QLTN\bin\Release\QLTN.exe
+C:\Users\Terrykote\Desktop\QLTN\bin\Release\QLTN.pdb
+C:\Users\Terrykote\Desktop\QLTN\obj\Release\QLTN.csproj.AssemblyReference.cache
+C:\Users\Terrykote\Desktop\QLTN\obj\Release\QLTN.Properties.Resources.resources
+C:\Users\Terrykote\Desktop\QLTN\obj\Release\QLTN.csproj.GenerateResource.cache
+C:\Users\Terrykote\Desktop\QLTN\obj\Release\QLTN.csproj.CoreCompileInputs.cache
+C:\Users\Terrykote\Desktop\QLTN\obj\Release\QLTN.exe
+C:\Users\Terrykote\Desktop\QLTN\obj\Release\QLTN.pdb

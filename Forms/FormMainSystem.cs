@@ -22,10 +22,21 @@ namespace QLTN.Forms
             FormBorderStyle = FormBorderStyle.Sizable;
             MaximizeBox = true;
 
-            Panel surface = CreateSurfacePanel(new Size(560, 320));
+            Panel surface = CreateSurfacePanel(new Size(620, 360));
             surface.Anchor = AnchorStyles.None;
             Controls.Add(surface);
             AttachCentering(surface);
+
+            TableLayoutPanel layout = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 1,
+                Padding = new Padding(32),
+                BackColor = Color.Transparent
+            };
+            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            surface.Controls.Add(layout);
 
             Label placeholderLabel = new Label
             {
@@ -33,10 +44,9 @@ namespace QLTN.Forms
                 TextAlign = ContentAlignment.MiddleCenter,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 20, FontStyle.Bold),
-                Text = "Trang ch\u00EDnh \u0111ang \u0111\u01B0\u1EE3c x\u00E2y d\u1EF1ng.\nC\u00E1c ch\u1EE9c n\u0103ng s\u1EBD s\u1EDBm c\u00F3 m\u1EB7t."
+                Text = "Trang ch\u00EDnh \u0111ang \u0111\u01B0\u1EE3c x\u00E2y d\u1EF1ng.\nVui l\u00F2ng quay l\u1EA1i menu ch\u00EDnh khi c\u1EA7n."
             };
-
-            surface.Controls.Add(placeholderLabel);
+            layout.Controls.Add(placeholderLabel, 0, 0);
         }
 
         private void InitializeComponent()

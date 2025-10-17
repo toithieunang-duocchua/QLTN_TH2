@@ -123,7 +123,7 @@ namespace QLTN.Forms
             currentY = resendLink.Bottom + 12;
 
             LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
-            backLink.Click += (s, e) => ShowNextForm(new FormLogin());
+            backLink.Click += (s, e) => ShowNextForm(new LoginContentForm());
             mainPanel.Controls.Add(backLink);
 
             currentY = backLink.Bottom + 16;
@@ -234,13 +234,7 @@ namespace QLTN.Forms
 
         private void ShowNextForm(Form form)
         {
-            if (WindowState == FormWindowState.Maximized)
-            {
-                form.WindowState = FormWindowState.Maximized;
-            }
-
-            form.Show();
-            Hide();
+            AuthNavigationManager.Navigate(form, this);
         }
 
         private void InitializeComponent()

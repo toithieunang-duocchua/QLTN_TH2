@@ -158,7 +158,7 @@ namespace QLTN.Forms
             LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
             backLink.Click += (s, e) =>
             {
-                ShowNextForm(new FormLogin());
+                ShowNextForm(new LoginContentForm());
             };
             mainPanel.Controls.Add(backLink);
 
@@ -498,7 +498,7 @@ namespace QLTN.Forms
 
                 MessageBox.Show("\u0110\u0103ng k\u00FD th\u00E0nh c\u00F4ng! Vui l\u00F2ng \u0111\u0103ng nh\u1EADp.", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                ShowNextForm(new FormLogin());
+                ShowNextForm(new LoginContentForm());
             }
             catch (Exception ex)
             {
@@ -525,13 +525,7 @@ namespace QLTN.Forms
 
         private void ShowNextForm(Form form)
         {
-            if (WindowState == FormWindowState.Maximized)
-            {
-                form.WindowState = FormWindowState.Maximized;
-            }
-
-            form.Show();
-            Hide();
+            AuthNavigationManager.Navigate(form, this);
         }
 
         private static string GetContractTermsContent()

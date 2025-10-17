@@ -353,14 +353,11 @@ CREATE TABLE thongbaohethong (
     tieuDe NVARCHAR(255) NOT NULL,
     noiDung NVARCHAR(MAX) NOT NULL,
     loaiThongBao NVARCHAR(20) DEFAULT N'Thông báo' CHECK (loaiThongBao IN (N'Thông báo', N'Cảnh báo', N'Lỗi', N'Thành công')),
-    kenhGui NVARCHAR(20) DEFAULT N'Email' CHECK (kenhGui IN (N'Email', N'Zalo', N'Cả hai')),
+    kenhGui NVARCHAR(20) DEFAULT N'Email' CHECK (kenhGui = N'Email'),
     trangThaiGui NVARCHAR(30) DEFAULT N'Chưa gửi' CHECK (trangThaiGui IN (N'Chưa gửi', N'Đang gửi', N'Đã gửi thành công', N'Gửi thất bại')),
     emailGui BIT DEFAULT 0,
-    zaloGui BIT DEFAULT 0,
     thoiGianGuiEmail DATETIME,
-    thoiGianGuiZalo DATETIME,
     loiEmail NVARCHAR(MAX),
-    loiZalo NVARCHAR(MAX),
     daDoc BIT DEFAULT 0,
     ngayTao DATETIME DEFAULT GETDATE(),
     ngayCapNhat DATETIME DEFAULT GETDATE()
@@ -424,7 +421,6 @@ CREATE TABLE danhsachnguoinhan (
     hoTen NVARCHAR(100) NOT NULL,
     email NVARCHAR(100),
     soDienThoai NVARCHAR(20),
-    zaloId NVARCHAR(100),
     loaiNguoiNhan NVARCHAR(20) DEFAULT N'Người thuê' CHECK (loaiNguoiNhan IN (N'Người thuê', N'Admin', N'Khách hàng', N'Khác')),
     trangThai BIT DEFAULT 1,
     ghiChu NVARCHAR(MAX),
@@ -438,7 +434,7 @@ CREATE TABLE lichsuguitb (
     id INT IDENTITY(1,1) PRIMARY KEY,
     idThongBao INT NOT NULL,
     idNguoiNhan INT NOT NULL,
-    kenhGui NVARCHAR(20) NOT NULL CHECK (kenhGui IN (N'Email', N'Zalo')),
+    kenhGui NVARCHAR(20) NOT NULL CHECK (kenhGui = N'Email'),
     trangThai NVARCHAR(20) DEFAULT N'Đang xử lý' CHECK (trangThai IN (N'Thành công', N'Thất bại', N'Đang xử lý')),
     thoiGianGui DATETIME DEFAULT GETDATE(),
     loiChiTiet NVARCHAR(MAX),
@@ -451,7 +447,7 @@ GO
 CREATE TABLE template_thongbao (
     id INT IDENTITY(1,1) PRIMARY KEY,
     tenTemplate NVARCHAR(100) NOT NULL,
-    loaiTemplate NVARCHAR(20) NOT NULL CHECK (loaiTemplate IN (N'Email', N'Zalo', N'Cả hai')),
+    loaiTemplate NVARCHAR(20) NOT NULL CHECK (loaiTemplate = N'Email'),
     tieuDeTemplate NVARCHAR(255) NOT NULL,
     noiDungTemplate NVARCHAR(MAX) NOT NULL,
     cacBienSuDung NVARCHAR(MAX),
@@ -476,3 +472,5 @@ GO
 PRINT 'Database QLTN đã được tạo thành công với 29 bảng!';
 PRINT 'Sẵn sàng để sử dụng trên SQL Server Management Studio.';
 GO
+
+

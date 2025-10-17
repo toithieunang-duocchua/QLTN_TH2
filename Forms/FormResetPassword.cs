@@ -107,7 +107,7 @@ namespace QLTN.Forms
             currentY = completeButton.Bottom + 20;
 
             LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
-            backLink.Click += (s, e) => ShowNextForm(new FormLogin());
+            backLink.Click += (s, e) => ShowNextForm(new LoginContentForm());
             mainPanel.Controls.Add(backLink);
 
             ActiveControl = newPasswordTextBox;
@@ -252,7 +252,7 @@ namespace QLTN.Forms
 
                 MessageBox.Show("\u0110\u1EB7t l\u1EA1i m\u1EADt kh\u1EA9u th\u00E0nh c\u00F4ng! Vui l\u00F2ng \u0111\u0103ng nh\u1EADp l\u1EA1i.", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                ShowNextForm(new FormLogin());
+                ShowNextForm(new LoginContentForm());
             }
             catch (Exception ex)
             {
@@ -291,13 +291,7 @@ namespace QLTN.Forms
 
         private void ShowNextForm(Form form)
         {
-            if (WindowState == FormWindowState.Maximized)
-            {
-                form.WindowState = FormWindowState.Maximized;
-            }
-
-            form.Show();
-            Hide();
+            AuthNavigationManager.Navigate(form, this);
         }
 
         private void InitializeComponent()

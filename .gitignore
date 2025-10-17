@@ -1,1 +1,12 @@
-# Intentionally left blank so all generated assets remain tracked.
+# Build outputs
+/bin/
+/obj/
+
+# Visual Studio workspace
+/.vs/
+
+# NuGet packages (restore on demand)
+/packages/
+
+# User-specific config
+App.config

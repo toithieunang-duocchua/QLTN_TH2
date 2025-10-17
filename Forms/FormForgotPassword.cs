@@ -7,7 +7,7 @@ using QLTN.Services;
 
 namespace QLTN.Forms
 {
-    public partial class FormForgotPassword : ThemedForm
+    public partial class FormForgotPassword : ThemedForm, IAuthView
     {
         private const int ContentWidth = 320;
         private static readonly Size TargetFormSize = new Size(1024, 576);
@@ -99,7 +99,7 @@ namespace QLTN.Forms
             currentY += 55;
 
             LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
-            backLink.Click += (s, e) => ShowNextForm(new LoginContentForm());
+            backLink.Click += (s, e) => ShowNextForm<LoginContentForm>();
             mainPanel.Controls.Add(backLink);
 
             currentY += 35;
@@ -211,9 +211,44 @@ namespace QLTN.Forms
             }
         }
 
+        private void ShowNextForm<TForm>() where TForm : Form, new()
+        {
+            AuthNavigationManager.Navigate<TForm>(this);
+        }
+
         private void ShowNextForm(Form form)
         {
             AuthNavigationManager.Navigate(form, this);
+        }
+
+        void IAuthView.PrepareForDisplay()
+        {
+            TextBox emailTextBox = FindControlRecursive<TextBox>("txtEmail");
+            Label errorLabel = FindControlRecursive<Label>("lblError");
+            Button nextButton = FindControlRecursive<Button>("btnNext");
+
+            if (errorLabel != null)
+            {
+                errorLabel.Visible = false;
+                errorLabel.Text = string.Empty;
+            }
+
+            if (emailTextBox != null)
+            {
+                emailTextBox.Text = string.Empty;
+                ResetValidationStates(emailTextBox);
+            }
+
+            if (nextButton != null)
+            {
+                AcceptButton = nextButton;
+            }
+
+            if (emailTextBox != null)
+            {
+                ActiveControl = emailTextBox;
+                emailTextBox.Focus();
+            }
         }
 
         private void InitializeComponent()

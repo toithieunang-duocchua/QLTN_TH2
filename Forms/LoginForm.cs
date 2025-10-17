@@ -39,7 +39,7 @@ namespace QLTN.Forms
             Controls.Add(contentPanel);
 
             AuthNavigationManager.Initialize(contentPanel);
-            AuthNavigationManager.Navigate(new LoginContentForm());
+            AuthNavigationManager.Navigate<LoginContentForm>();
         }
 
         private void InitializeComponent()

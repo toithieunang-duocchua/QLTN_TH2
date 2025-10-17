@@ -123,7 +123,7 @@ namespace QLTN.Forms
             currentY = resendLink.Bottom + 12;
 
             LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
-            backLink.Click += (s, e) => ShowNextForm(new LoginContentForm());
+            backLink.Click += (s, e) => ShowNextForm<LoginContentForm>();
             mainPanel.Controls.Add(backLink);
 
             currentY = backLink.Bottom + 16;
@@ -230,6 +230,11 @@ namespace QLTN.Forms
             {
                 SetValidationState(input, ValidationState.Error);
             }
+        }
+
+        private void ShowNextForm<TForm>() where TForm : Form, new()
+        {
+            AuthNavigationManager.Navigate<TForm>(this);
         }
 
         private void ShowNextForm(Form form)

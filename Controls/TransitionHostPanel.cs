@@ -12,7 +12,7 @@ namespace QLTN.Controls
     /// </summary>
     internal sealed class TransitionHostPanel : Panel
     {
-        private const int AnimationDuration = 200; // milliseconds
+        private const int AnimationDuration = 180; // milliseconds
         private const int TimerInterval = 15;      // ~60 FPS
 
         private Form currentForm;
@@ -28,6 +28,11 @@ namespace QLTN.Controls
         {
             DoubleBuffered = true;
             ResizeRedraw = true;
+            SetStyle(ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.OptimizedDoubleBuffer |
+                     ControlStyles.UserPaint |
+                     ControlStyles.ResizeRedraw, true);
+            UpdateStyles();
             animationTimer = new Timer { Interval = TimerInterval };
             animationTimer.Tick += AnimationTimerOnTick;
         }
@@ -50,36 +55,32 @@ namespace QLTN.Controls
 
             PrepareForm(form);
 
-            // Capture outgoing snapshot before starting transition.
+            SuspendLayout();
+
             Bitmap outgoing = CaptureSnapshot(currentForm);
 
-            // Layout incoming form to capture a clean snapshot.
-            if (!Controls.Contains(form))
+            bool alreadyAdded = Controls.Contains(form);
+            if (!alreadyAdded)
             {
                 Controls.Add(form);
             }
 
-            form.Visible = true;
-            form.Enabled = true;
-            form.Refresh();
+            form.Visible = false;
+            form.Enabled = false;
+            form.Bounds = new Rectangle(Point.Empty, Size);
+            form.CreateControl();
+            form.PerformLayout();
+
             Bitmap incoming = CaptureSnapshot(form);
 
-            // Handle first load (no animation needed).
             if (outgoing == null || incoming == null)
             {
+                ResumeLayout();
                 CompleteTransitionImmediately(form);
                 return;
             }
 
             incomingForm = form;
-            incomingForm.Visible = false;
-            incomingForm.Enabled = false;
-
-            if (currentForm != null)
-            {
-                currentForm.Visible = false;
-                currentForm.Enabled = false;
-            }
 
             outgoingSnapshot?.Dispose();
             incomingSnapshot?.Dispose();
@@ -88,6 +89,7 @@ namespace QLTN.Controls
             incomingSnapshot = incoming;
 
             elapsed = 0;
+            ResumeLayout();
             animationTimer.Start();
         }
 
@@ -148,6 +150,8 @@ namespace QLTN.Controls
 
             if (incomingForm != null)
             {
+                SuspendLayout();
+
                 if (currentForm != null)
                 {
                     Controls.Remove(currentForm);
@@ -159,6 +163,8 @@ namespace QLTN.Controls
                 incomingForm.BringToFront();
                 currentForm = incomingForm;
                 incomingForm = null;
+
+                ResumeLayout(true);
             }
 
             Invalidate();
@@ -167,6 +173,8 @@ namespace QLTN.Controls
         private void CompleteTransitionImmediately(Form form)
         {
             CancelAnimation();
+
+            SuspendLayout();
 
             if (currentForm != null && !ReferenceEquals(currentForm, form))
             {
@@ -178,6 +186,8 @@ namespace QLTN.Controls
             form.Enabled = true;
             form.BringToFront();
             currentForm = form;
+
+            ResumeLayout(true);
         }
 
         private void CancelAnimation()
@@ -192,11 +202,15 @@ namespace QLTN.Controls
 
             if (incomingForm != null)
             {
+                SuspendLayout();
+
                 incomingForm.Visible = true;
                 incomingForm.Enabled = true;
                 incomingForm.BringToFront();
                 currentForm = incomingForm;
                 incomingForm = null;
+
+                ResumeLayout(true);
             }
 
             if (currentForm != null)

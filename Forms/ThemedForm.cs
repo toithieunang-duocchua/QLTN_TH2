@@ -1,7 +1,6 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.IO;
 using System.Windows.Forms;
 using QLTN.Controls;
 
@@ -16,9 +15,6 @@ namespace QLTN.Forms
     /// </summary>
     public class ThemedForm : Form
     {
-        private static readonly object BackgroundSync = new object();
-        private static Image sharedBackground;
-
         protected static readonly Color SurfaceColor = Color.FromArgb(217, 50, 50, 50);
         protected static readonly Color SurfaceBorderColor = Color.FromArgb(80, 255, 255, 255);
         protected static readonly Color PrimaryAccentColor = Color.FromArgb(255, 51, 51);
@@ -34,47 +30,57 @@ namespace QLTN.Forms
             ResizeRedraw = true;
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
             BackColor = Color.Black;
-            EnsureBackgroundLoaded();
         }
 
-        private static void EnsureBackgroundLoaded()
+        protected override CreateParams CreateParams
         {
-            if (sharedBackground != null)
+            get
             {
-                return;
+                CreateParams createParams = base.CreateParams;
+                createParams.ExStyle |= 0x02000000; // WS_EX_COMPOSITED
+                return createParams;
+            }
+        }
+
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+
+            Color target = Parent?.BackColor ?? Color.Black;
+            if (target == Color.Transparent)
+            {
+                target = Color.Black;
             }
 
-            lock (BackgroundSync)
-            {
-                if (sharedBackground != null)
-                {
-                    return;
-                }
-
-                string assetsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "main_background.png");
-                if (File.Exists(assetsPath))
-                {
-                    sharedBackground = Image.FromFile(assetsPath);
-                }
-            }
+            BackColor = target;
         }
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            if (sharedBackground != null)
+            if (!ShouldRenderOwnBackground())
             {
-                e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                e.Graphics.DrawImage(sharedBackground, new Rectangle(Point.Empty, ClientSize));
-            }
-            else
-            {
-                e.Graphics.Clear(Color.Black);
+                base.OnPaintBackground(e);
+                return;
             }
 
-            using (SolidBrush overlayBrush = new SolidBrush(Color.FromArgb(130, 0, 0, 0)))
+            e.Graphics.Clear(Color.Black);
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_ERASEBKGND = 0x0014;
+            if (m.Msg == WM_ERASEBKGND)
             {
-                e.Graphics.FillRectangle(overlayBrush, ClientRectangle);
+                m.Result = IntPtr.Zero;
+                return;
             }
+
+            base.WndProc(ref m);
+        }
+
+        private bool ShouldRenderOwnBackground()
+        {
+            return Parent == null || ReferenceEquals(TopLevelControl, this);
         }
 
         /// <summary>
@@ -83,7 +89,7 @@ namespace QLTN.Forms
         /// </summary>
         protected Panel CreateSurfacePanel(Size size, int cornerRadius = 12)
         {
-            Panel panel = new Panel
+            SurfacePanel panel = new SurfacePanel
             {
                 Size = size,
                 BackColor = Color.Transparent
@@ -332,6 +338,32 @@ namespace QLTN.Forms
             {
                 SetValidationState(textBox, ValidationState.Neutral);
             }
+        }
+
+        private sealed class SurfacePanel : Panel
+        {
+            public SurfacePanel()
+            {
+                DoubleBuffered = true;
+                ResizeRedraw = true;
+                SetStyle(ControlStyles.AllPaintingInWmPaint |
+                         ControlStyles.OptimizedDoubleBuffer |
+                         ControlStyles.UserPaint |
+                         ControlStyles.ResizeRedraw, true);
+                UpdateStyles();
+                BackColor = Color.Transparent;
+            }
+        }
+
+        protected TControl FindControlRecursive<TControl>(string controlName) where TControl : Control
+        {
+            if (string.IsNullOrEmpty(controlName))
+            {
+                return null;
+            }
+
+            Control[] matches = Controls.Find(controlName, true);
+            return matches.Length > 0 ? matches[0] as TControl : null;
         }
     }
 }

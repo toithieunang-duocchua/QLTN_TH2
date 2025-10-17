@@ -8,7 +8,7 @@ using QLTN.Services;
 
 namespace QLTN.Forms
 {
-    public partial class LoginContentForm : ThemedForm
+    public partial class LoginContentForm : ThemedForm, IAuthView
     {
         private const int ContentWidth = 320;
         private static readonly Size TargetFormSize = new Size(1024, 576);
@@ -117,7 +117,7 @@ namespace QLTN.Forms
             LinkLabel forgotPasswordLink = CreateLinkLabel("B\u1EA1n qu\u00EAn m\u1EADt kh\u1EA9u?", currentY, mainPanel.Width);
             forgotPasswordLink.Click += (s, e) =>
             {
-                ShowNextForm(new FormForgotPassword());
+                ShowNextForm<FormForgotPassword>();
             };
             mainPanel.Controls.Add(forgotPasswordLink);
 
@@ -126,7 +126,7 @@ namespace QLTN.Forms
             LinkLabel registerLink = CreateLinkLabel("T\u1EA1o t\u00E0i kho\u1EA3n", currentY, mainPanel.Width);
             registerLink.Click += (s, e) =>
             {
-                ShowNextForm(new FormRegister());
+                ShowNextForm<FormRegister>();
             };
             mainPanel.Controls.Add(registerLink);
 
@@ -262,6 +262,11 @@ namespace QLTN.Forms
             }
         }
 
+        private void ShowNextForm<TForm>() where TForm : Form, new()
+        {
+            AuthNavigationManager.Navigate<TForm>(this);
+        }
+
         private void ShowNextForm(Form form)
         {
             if (form == null)
@@ -289,6 +294,43 @@ namespace QLTN.Forms
             }
 
             AuthNavigationManager.Navigate(form, this);
+        }
+
+        void IAuthView.PrepareForDisplay()
+        {
+            TextBox phoneTextBox = FindControlRecursive<TextBox>("txtPhone");
+            TextBox passwordTextBox = FindControlRecursive<TextBox>("txtPassword");
+            Label errorLabel = FindControlRecursive<Label>("lblError");
+            Button loginButton = FindControlRecursive<Button>("btnLogin");
+
+            if (errorLabel != null)
+            {
+                errorLabel.Visible = false;
+                errorLabel.Text = string.Empty;
+            }
+
+            if (phoneTextBox != null)
+            {
+                phoneTextBox.Text = string.Empty;
+            }
+
+            if (passwordTextBox != null)
+            {
+                passwordTextBox.Text = string.Empty;
+            }
+
+            ResetValidationStates(phoneTextBox, passwordTextBox);
+
+            if (loginButton != null)
+            {
+                AcceptButton = loginButton;
+            }
+
+            if (phoneTextBox != null)
+            {
+                ActiveControl = phoneTextBox;
+                phoneTextBox.Focus();
+            }
         }
 
         private void InitializeComponent()

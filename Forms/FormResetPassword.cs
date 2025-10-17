@@ -8,7 +8,7 @@ using QLTN.Database;
 
 namespace QLTN.Forms
 {
-    public partial class FormResetPassword : ThemedForm
+    public partial class FormResetPassword : ThemedForm, IAuthView
     {
         private const int ContentWidth = 320;
         private static readonly Size TargetFormSize = new Size(1024, 576);
@@ -107,7 +107,7 @@ namespace QLTN.Forms
             currentY = completeButton.Bottom + 20;
 
             LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
-            backLink.Click += (s, e) => ShowNextForm(new LoginContentForm());
+            backLink.Click += (s, e) => ShowNextForm<LoginContentForm>();
             mainPanel.Controls.Add(backLink);
 
             ActiveControl = newPasswordTextBox;
@@ -252,7 +252,7 @@ namespace QLTN.Forms
 
                 MessageBox.Show("\u0110\u1EB7t l\u1EA1i m\u1EADt kh\u1EA9u th\u00E0nh c\u00F4ng! Vui l\u00F2ng \u0111\u0103ng nh\u1EADp l\u1EA1i.", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                ShowNextForm(new LoginContentForm());
+                ShowNextForm<LoginContentForm>();
             }
             catch (Exception ex)
             {
@@ -289,9 +289,57 @@ namespace QLTN.Forms
             }
         }
 
+        private void ShowNextForm<TForm>() where TForm : Form, new()
+        {
+            AuthNavigationManager.Navigate<TForm>(this);
+        }
+
         private void ShowNextForm(Form form)
         {
             AuthNavigationManager.Navigate(form, this);
+        }
+
+        void IAuthView.PrepareForDisplay()
+        {
+            TextBox newPasswordTextBox = FindControlRecursive<TextBox>("txtNewPassword");
+            TextBox confirmPasswordTextBox = FindControlRecursive<TextBox>("txtConfirmPassword");
+            Label errorLabel = FindControlRecursive<Label>("lblError");
+            Label strengthLabel = FindControlRecursive<Label>("lblStrength");
+            Button completeButton = FindControlRecursive<Button>("btnComplete");
+
+            if (errorLabel != null)
+            {
+                errorLabel.Visible = false;
+                errorLabel.Text = string.Empty;
+            }
+
+            if (strengthLabel != null)
+            {
+                strengthLabel.Text = string.Empty;
+            }
+
+            if (newPasswordTextBox != null)
+            {
+                newPasswordTextBox.Text = string.Empty;
+            }
+
+            if (confirmPasswordTextBox != null)
+            {
+                confirmPasswordTextBox.Text = string.Empty;
+            }
+
+            ResetValidationStates(newPasswordTextBox, confirmPasswordTextBox);
+
+            if (completeButton != null)
+            {
+                AcceptButton = completeButton;
+            }
+
+            if (newPasswordTextBox != null)
+            {
+                ActiveControl = newPasswordTextBox;
+                newPasswordTextBox.Focus();
+            }
         }
 
         private void InitializeComponent()

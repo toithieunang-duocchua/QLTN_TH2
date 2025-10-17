@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -8,7 +8,7 @@ using QLTN.Services;
 
 namespace QLTN.Forms
 {
-    public partial class FormRegister : ThemedForm
+    public partial class FormRegister : ThemedForm, IAuthView
     {
         private const int ContentWidth = 360;
         private static readonly Size TargetFormSize = new Size(1024, 576);
@@ -158,7 +158,7 @@ namespace QLTN.Forms
             LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
             backLink.Click += (s, e) =>
             {
-                ShowNextForm(new LoginContentForm());
+                ShowNextForm<LoginContentForm>();
             };
             mainPanel.Controls.Add(backLink);
 
@@ -498,7 +498,7 @@ namespace QLTN.Forms
 
                 MessageBox.Show("\u0110\u0103ng k\u00FD th\u00E0nh c\u00F4ng! Vui l\u00F2ng \u0111\u0103ng nh\u1EADp.", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                ShowNextForm(new LoginContentForm());
+                ShowNextForm<LoginContentForm>();
             }
             catch (Exception ex)
             {
@@ -523,9 +523,87 @@ namespace QLTN.Forms
             }
         }
 
+        private void ShowNextForm<TForm>() where TForm : Form, new()
+        {
+            AuthNavigationManager.Navigate<TForm>(this);
+        }
+
         private void ShowNextForm(Form form)
         {
             AuthNavigationManager.Navigate(form, this);
+        }
+
+        void IAuthView.PrepareForDisplay()
+        {
+            TextBox nameTextBox = FindControlRecursive<TextBox>("txtName");
+            TextBox phoneTextBox = FindControlRecursive<TextBox>("txtPhone");
+            TextBox emailTextBox = FindControlRecursive<TextBox>("txtEmail");
+            TextBox passwordTextBox = FindControlRecursive<TextBox>("txtPassword");
+            Label errorLabel = FindControlRecursive<Label>("lblError");
+            Label strengthLabel = FindControlRecursive<Label>("lblStrength");
+            LargeRadioButton maleRadio = FindControlRecursive<LargeRadioButton>("rbMale");
+            LargeRadioButton femaleRadio = FindControlRecursive<LargeRadioButton>("rbFemale");
+            CheckBox termsCheckbox = FindControlRecursive<CheckBox>("chkTerms");
+            Button registerButton = FindControlRecursive<Button>("btnRegister");
+
+            if (errorLabel != null)
+            {
+                errorLabel.Visible = false;
+                errorLabel.Text = string.Empty;
+            }
+
+            if (strengthLabel != null)
+            {
+                strengthLabel.Text = string.Empty;
+            }
+
+            if (nameTextBox != null)
+            {
+                nameTextBox.Text = string.Empty;
+            }
+
+            if (phoneTextBox != null)
+            {
+                phoneTextBox.Text = string.Empty;
+            }
+
+            if (emailTextBox != null)
+            {
+                emailTextBox.Text = string.Empty;
+            }
+
+            if (passwordTextBox != null)
+            {
+                passwordTextBox.Text = string.Empty;
+            }
+
+            ResetValidationStates(nameTextBox, phoneTextBox, emailTextBox, passwordTextBox);
+
+            if (maleRadio != null)
+            {
+                maleRadio.Checked = true;
+            }
+
+            if (femaleRadio != null)
+            {
+                femaleRadio.Checked = false;
+            }
+
+            if (termsCheckbox != null)
+            {
+                termsCheckbox.Checked = false;
+            }
+
+            if (registerButton != null)
+            {
+                AcceptButton = registerButton;
+            }
+
+            if (nameTextBox != null)
+            {
+                ActiveControl = nameTextBox;
+                nameTextBox.Focus();
+            }
         }
 
         private static string GetContractTermsContent()

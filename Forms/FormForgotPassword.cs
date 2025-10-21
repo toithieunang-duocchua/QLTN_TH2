@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -12,6 +13,7 @@ namespace QLTN.Forms
         private const int ContentWidth = 320;
         private static readonly Size TargetFormSize = new Size(1024, 576);
         private readonly UserService userService = new UserService();
+        private readonly EmailVerificationService verificationService = new EmailVerificationService();
 
         public FormForgotPassword()
         {
@@ -150,28 +152,31 @@ namespace QLTN.Forms
             return link;
         }
 
-        private void BtnNext_Click(object sender, EventArgs e)
+        private async void BtnNext_Click(object sender, EventArgs e)
         {
             TextBox emailTextBox = Controls.Find("txtEmail", true)[0] as TextBox;
             Label errorLabel = Controls.Find("lblError", true)[0] as Label;
+            Button triggerButton = sender as Button ?? Controls.Find("btnNext", true)[0] as Button;
 
-            string email = emailTextBox.Text.Trim();
+            string email = emailTextBox?.Text.Trim() ?? string.Empty;
             errorLabel.Visible = false;
             ResetValidationStates(emailTextBox);
 
             if (string.IsNullOrEmpty(email))
             {
                 ShowError("Vui l\u00F2ng nh\u1EADp email c\u1EE7a b\u1EA1n", emailTextBox);
-                emailTextBox.Focus();
+                emailTextBox?.Focus();
                 return;
             }
 
             if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
                 ShowError("Email kh\u00F4ng h\u1EE3p l\u1EC7", emailTextBox);
-                emailTextBox.Focus();
+                emailTextBox?.Focus();
                 return;
             }
+
+            Cursor previousCursor = Cursor;
 
             try
             {
@@ -179,18 +184,45 @@ namespace QLTN.Forms
                 {
                     ShowError("Email kh\u00F4ng t\u1ED3n t\u1EA1i trong h\u1EC7 th\u1ED1ng", emailTextBox);
                     SetValidationState(emailTextBox, ValidationState.Error);
-                    emailTextBox.Focus();
+                    emailTextBox?.Focus();
                     return;
                 }
+
+                if (triggerButton != null)
+                {
+                    triggerButton.Enabled = false;
+                }
+                Cursor = Cursors.WaitCursor;
+
+                await verificationService.SendVerificationCodeAsync(email);
 
                 SetValidationState(emailTextBox, ValidationState.Success);
 
                 MessageBox.Show("M\u00E3 x\u00E1c th\u1EF1c \u0111\u00E3 \u0111\u01B0\u1EE3c g\u1EEDi \u0111\u1EBFn email c\u1EE7a b\u1EA1n!", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ShowNextForm(new FormVerification(email));
             }
+            catch (ConfigurationErrorsException ex)
+            {
+                ShowError($"C\u1EA5u h\u00ECnh email ch\u01B0a \u0111\u1EA7y \u0111\u1EE7: {ex.Message}", emailTextBox);
+                SetValidationState(emailTextBox, ValidationState.Neutral);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowError(ex.Message, emailTextBox);
+                SetValidationState(emailTextBox, ValidationState.Neutral);
+            }
             catch (Exception ex)
             {
-                ShowError($"L\u1ED7i: {ex.Message}", emailTextBox);
+                ShowError($"Kh\u00F4ng th\u1EC3 g\u1EEDi m\u00E3 x\u00E1c th\u1EF1c: {ex.Message}", emailTextBox);
+                SetValidationState(emailTextBox, ValidationState.Neutral);
+            }
+            finally
+            {
+                Cursor = previousCursor;
+                if (triggerButton != null)
+                {
+                    triggerButton.Enabled = true;
+                }
             }
         }
 

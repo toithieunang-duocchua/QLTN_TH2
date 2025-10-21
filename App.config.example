@@ -4,6 +4,22 @@
     <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
   </startup>
 
+  <appSettings>
+    <!-- Google OAuth 2.0 settings retrieved from Google Cloud Console (refresh token with Gmail.Send scope) -->
+    <add key="GoogleClientId" value="YOUR_GOOGLE_CLIENT_ID" />
+    <add key="GoogleClientSecret" value="YOUR_GOOGLE_CLIENT_SECRET" />
+    <add key="GoogleRefreshToken" value="YOUR_GOOGLE_REFRESH_TOKEN" />
+    <add key="GoogleSenderEmail" value="your-email@gmail.com" />
+    <add key="GoogleSenderName" value="QLTN Support" />
+
+    <!-- Optional n8n workflow parameters (leave blank to disable) -->
+    <add key="N8nBaseUrl" value="https://your-n8n-instance.example/" />
+    <add key="N8nRequestVerificationPath" value="webhook/verify-email" />
+    <add key="N8nVerifyCodePath" value="webhook/verify-code" />
+    <add key="N8nApiKey" value="" />
+    <add key="N8nApiKeyHeader" value="X-N8N-API-KEY" />
+  </appSettings>
+
   <!-- Rename this file to App.config locally and update the connection string for your machine. -->
   <connectionStrings>
     <add name="QLTNConnection"

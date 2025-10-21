@@ -1,8 +1,11 @@
 using System;
+using System.Configuration;
 using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using QLTN.Controls;
+using QLTN.Services;
 
 namespace QLTN.Forms
 {
@@ -11,6 +14,7 @@ namespace QLTN.Forms
         private const int ContentWidth = 320;
         private static readonly Size TargetFormSize = new Size(1024, 576);
         private readonly string userEmail;
+        private readonly EmailVerificationService verificationService = new EmailVerificationService();
 
         public FormVerification(string email)
         {
@@ -117,7 +121,8 @@ namespace QLTN.Forms
             currentY = verifyButton.Bottom + 20;
 
             LinkLabel resendLink = CreateLinkLabel("G\u1EEDi l\u1EA1i m\u00E3 x\u00E1c minh", currentY, mainPanel.Width);
-            resendLink.Click += (s, e) => ResendCode();
+            resendLink.Name = "lnkResend";
+            resendLink.Click += ResendLink_Click;
             mainPanel.Controls.Add(resendLink);
 
             currentY = resendLink.Bottom + 12;
@@ -174,45 +179,132 @@ namespace QLTN.Forms
             return link;
         }
 
-        private void BtnVerify_Click(object sender, EventArgs e)
+        private async void BtnVerify_Click(object sender, EventArgs e)
         {
             TextBox codeTextBox = Controls.Find("txtCode", true)[0] as TextBox;
             Label errorLabel = Controls.Find("lblError", true)[0] as Label;
+            Button verifyButton = sender as Button ?? Controls.Find("btnVerify", true).FirstOrDefault() as Button;
 
-            string code = codeTextBox.Text.Trim();
+            string code = codeTextBox?.Text.Trim() ?? string.Empty;
             errorLabel.Visible = false;
             ResetValidationStates(codeTextBox);
 
             if (string.IsNullOrEmpty(code))
             {
                 ShowError("Vui l\u00F2ng nh\u1EADp m\u00E3 x\u00E1c minh", codeTextBox);
-                codeTextBox.Focus();
+                codeTextBox?.Focus();
                 return;
             }
 
             if (code.Length != 6)
             {
                 ShowError("M\u00E3 x\u00E1c minh ph\u1EA3i c\u00F3 6 ch\u1EEF s\u1ED1", codeTextBox);
-                codeTextBox.Focus();
+                codeTextBox?.Focus();
                 return;
             }
 
-            if (code != "123456")
+            Cursor previousCursor = Cursor;
+
+            try
             {
-                ShowError("M\u00E3 x\u00E1c minh kh\u00F4ng ch\u00EDnh x\u00E1c", codeTextBox);
-                codeTextBox.Focus();
-                return;
+                if (verifyButton != null)
+                {
+                    verifyButton.Enabled = false;
+                }
+
+                Cursor = Cursors.WaitCursor;
+
+                EmailVerificationService.VerificationStatus status =
+                    await verificationService.VerifyCodeAsync(userEmail, code);
+
+                switch (status)
+                {
+                    case EmailVerificationService.VerificationStatus.Success:
+                        SetValidationState(codeTextBox, ValidationState.Success);
+                        MessageBox.Show("X\u00E1c minh th\u00E0nh c\u00F4ng!", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        ShowNextForm(new FormResetPassword(userEmail));
+                        break;
+                    case EmailVerificationService.VerificationStatus.NotRequested:
+                        ShowError("Kh\u00F4ng t\u00ECm th\u1EA5y y\u00EAu c\u1EA7u x\u00E1c th\u1EF1c. Vui l\u00F2ng g\u1EEDi l\u1EA1i m\u00E3.", codeTextBox);
+                        codeTextBox?.Focus();
+                        break;
+                    case EmailVerificationService.VerificationStatus.Expired:
+                        ShowError("M\u00E3 x\u00E1c minh \u0111\u00E3 h\u1EBFt h\u1EA1n. Vui l\u00F2ng g\u1EEDi l\u1EA1i m\u00E3.", codeTextBox);
+                        codeTextBox?.Focus();
+                        break;
+                    default:
+                        ShowError("M\u00E3 x\u00E1c minh kh\u00F4ng ch\u00EDnh x\u00E1c", codeTextBox);
+                        codeTextBox?.Focus();
+                        break;
+                }
             }
-
-            SetValidationState(codeTextBox, ValidationState.Success);
-
-            MessageBox.Show("X\u00E1c minh th\u00E0nh c\u00F4ng!", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            ShowNextForm(new FormResetPassword(userEmail));
+            catch (InvalidOperationException ex)
+            {
+                ShowError(ex.Message, codeTextBox);
+                codeTextBox?.Focus();
+            }
+            catch (Exception ex)
+            {
+                ShowError($"Kh\u00F4ng th\u1EC3 x\u00E1c minh m\u00E3: {ex.Message}", codeTextBox);
+                codeTextBox?.Focus();
+            }
+            finally
+            {
+                Cursor = previousCursor;
+                if (verifyButton != null)
+                {
+                    verifyButton.Enabled = true;
+                }
+            }
         }
 
-        private void ResendCode()
+        private async void ResendLink_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("M\u00E3 x\u00E1c minh m\u1EDBi \u0111\u00E3 \u0111\u01B0\u1EE3c g\u1EEDi!", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            TextBox codeTextBox = Controls.Find("txtCode", true)[0] as TextBox;
+            Label errorLabel = Controls.Find("lblError", true)[0] as Label;
+            LinkLabel resendLink = sender as LinkLabel ?? Controls.Find("lnkResend", true)[0] as LinkLabel;
+
+            errorLabel.Visible = false;
+            if (codeTextBox != null)
+            {
+                codeTextBox.Text = string.Empty;
+                ResetValidationStates(codeTextBox);
+            }
+
+            Cursor previousCursor = Cursor;
+
+            try
+            {
+                if (resendLink != null)
+                {
+                    resendLink.Enabled = false;
+                }
+                Cursor = Cursors.WaitCursor;
+
+                await verificationService.ResendCodeAsync(userEmail);
+
+                MessageBox.Show("M\u00E3 x\u00E1c minh m\u1EDBi \u0111\u00E3 \u0111\u01B0\u1EE3c g\u1EEDi!", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (ConfigurationErrorsException ex)
+            {
+                ShowError($"C\u1EA5u h\u00ECnh email ch\u01B0a \u0111\u1EA7y \u0111\u1EE7: {ex.Message}", codeTextBox);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ShowError(ex.Message, codeTextBox);
+            }
+            catch (Exception ex)
+            {
+                ShowError($"Kh\u00F4ng th\u1EC3 g\u1EEDi m\u00E3 x\u00E1c th\u1EF1c: {ex.Message}", codeTextBox);
+            }
+            finally
+            {
+                Cursor = previousCursor;
+                if (resendLink != null)
+                {
+                    resendLink.Enabled = true;
+                }
+            }
         }
 
         private void ShowError(string message, params TextBox[] inputs)

@@ -1,0 +1,319 @@
+{
+  "name": "QLTN – Email Verification (DataStore)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "verify-email",
+        "responseMode": "responseNode"
+      },
+      "id": "request-webhook",
+      "name": "Request Verification Code",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        220,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const body = $json.body ?? $json;\nconst emailRaw = body.email ?? '';\nconst email = emailRaw.toString().trim().toLowerCase();\nif (!email) {\n  throw new Error('Thiếu email trong request.');\n}\nconst now = new Date();\nconst expiresAt = new Date(now.getTime() + 5 * 60 * 1000);\nconst verificationCode = Math.floor(100000 + Math.random() * 900000).toString();\nreturn [{\n  json: {\n    email,\n    verificationCode,\n    expiresAtUtc: expiresAt.toISOString(),\n    createdAtUtc: now.toISOString(),\n    ttlSeconds: Math.floor((expiresAt.getTime() - now.getTime()) / 1000)\n  }\n}];"
+      },
+      "id": "prepare-payload",
+      "name": "Prepare Verification Payload",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        460,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "dataStoreId": "REPLACE_WITH_DATA_STORE_ID",
+        "key": "={{ $json.email }}",
+        "value": "={{ JSON.stringify({ code: $json.verificationCode, expiresAtUtc: $json.expiresAtUtc, createdAtUtc: $json.createdAtUtc }) }}",
+        "ttl": "={{ $json.ttlSeconds }}"
+      },
+      "id": "persist-code",
+      "name": "Store Verification",
+      "type": "n8n-nodes-base.dataStore",
+      "typeVersion": 1,
+      "position": [
+        720,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Mã xác minh QLTN",
+        "message": "Mã xác minh của bạn là: {{$json.verificationCode}}.<br/>Mã có hiệu lực trong 5 phút."
+      },
+      "id": "gmail-send",
+      "name": "Send Code via Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_YOUR_GMAIL_CREDENTIAL_ID"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const { verificationCode, ttlSeconds, ...rest } = $json;\nreturn [{ json: {\n  success: true,\n  email: rest.email,\n  expiresAtUtc: rest.expiresAtUtc,\n  expiresInSeconds: ttlSeconds,\n  message: 'Verification code sent'\n}}];"
+      },
+      "id": "build-request-response",
+      "name": "Build Verification Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        980,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{ $json }}",
+        "responseCode": 200
+      },
+      "id": "respond-request",
+      "name": "Respond Verification Request",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "verify-code",
+        "responseMode": "responseNode"
+      },
+      "id": "verify-webhook",
+      "name": "Verify Code Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        220,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataStoreId": "REPLACE_WITH_DATA_STORE_ID",
+        "key": "={{ ($json.body ?? $json).email.toString().trim().toLowerCase() }}"
+      },
+      "id": "fetch-code",
+      "name": "Fetch Stored Code",
+      "type": "n8n-nodes-base.dataStore",
+      "typeVersion": 1,
+      "position": [
+        460,
+        520
+      ],
+      "options": {
+        "continueOnFail": true
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const body = $item(0).json.body ?? $item(0).json;\nconst email = (body.email ?? '').toString().trim().toLowerCase();\nconst code = (body.code ?? '').toString().trim();\nconst store = $item(1).json;\nif (!email || !code) {\n  return [{ json: { status: 'incorrect', message: 'Email hoặc mã xác minh không hợp lệ.' } }];\n}\nif (!store || store.error === true || !store.value) {\n  return [{ json: { status: 'not_requested', message: 'Không tìm thấy yêu cầu xác minh. Vui lòng gửi lại mã.' } }];\n}\nconst record = JSON.parse(store.value);\nconst now = Date.now();\nconst expiresAt = new Date(record.expiresAtUtc).getTime();\nif (Number.isNaN(expiresAt) || expiresAt <= now) {\n  return [{ json: { status: 'expired', message: 'Mã xác minh đã hết hạn. Vui lòng yêu cầu mã mới.', deleteKey: email } }];\n}\nif (record.code !== code) {\n  return [{ json: { status: 'incorrect', message: 'Mã xác minh không chính xác.' } }];\n}\nconst remainingSeconds = Math.max(0, Math.floor((expiresAt - now) / 1000));\nreturn [{ json: { status: 'success', message: 'Code validated', remainingSeconds, deleteKey: email } }];"
+      },
+      "id": "evaluate-code",
+      "name": "Evaluate Verification Result",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        720,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ !!$json.deleteKey }}"
+            }
+          ]
+        }
+      },
+      "id": "should-delete",
+      "name": "Should Delete Entry?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        960,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "dataStoreId": "REPLACE_WITH_DATA_STORE_ID",
+        "key": "={{ $json.deleteKey }}"
+      },
+      "id": "delete-entry",
+      "name": "Delete Stored Code",
+      "type": "n8n-nodes-base.dataStore",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{ $json }}",
+        "responseCode": 200
+      },
+      "id": "respond-verify",
+      "name": "Respond Verification Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        580
+      ]
+    }
+  ],
+  "connections": {
+    "Request Verification Code": {
+      "main": [
+        [
+          {
+            "node": "Prepare Verification Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Verification Payload": {
+      "main": [
+        [
+          {
+            "node": "Store Verification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Code via Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Verification": {
+      "main": [
+        [
+          {
+            "node": "Build Verification Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Code via Gmail": {
+      "main": [
+        [
+          {
+            "node": "Build Verification Response",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Build Verification Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Verification Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Code Webhook": {
+      "main": [
+        [
+          {
+            "node": "Fetch Stored Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Stored Code": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Verification Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Verification Result": {
+      "main": [
+        [
+          {
+            "node": "Should Delete Entry?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Delete Entry?": {
+      "main": [
+        [
+          {
+            "node": "Delete Stored Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Verification Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Stored Code": {
+      "main": [
+        [
+          {
+            "node": "Respond Verification Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

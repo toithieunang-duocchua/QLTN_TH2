@@ -14,6 +14,14 @@ namespace QLTN.Forms
         private static readonly Size TargetFormSize = new Size(1024, 576);
         private readonly UserService userService = new UserService();
         private readonly EmailVerificationService verificationService = new EmailVerificationService();
+        private Panel _mainPanel;
+        private Label _titleLabel;
+        private Label _instructionsLabel;
+        private Label _emailLabel;
+        private StyledTextBox _emailTextBox;
+        private Button _nextButton;
+        private LinkLabel _backLink;
+        private Label _errorLabel;
 
         public FormForgotPassword()
         {
@@ -23,7 +31,7 @@ namespace QLTN.Forms
 
         private void SetupForm()
         {
-            Text = "Qu\u00EAn m\u1EADt kh\u1EA9u - H\u1EC7 th\u1ED1ng QLTN";
+            Text = "Quên mật khẩu - Hệ thống QLTN";
             Size = TargetFormSize;
             MinimumSize = TargetFormSize;
 
@@ -36,89 +44,82 @@ namespace QLTN.Forms
 
         private void SetupControls()
         {
-            Panel mainPanel = CreateSurfacePanel(new Size(420, 380));
-            mainPanel.Anchor = AnchorStyles.None;
-            Controls.Add(mainPanel);
-            AttachCentering(mainPanel);
+            _mainPanel = CreateSurfacePanel(new Size(420, 320));
+            _mainPanel.Anchor = AnchorStyles.None;
+            _mainPanel.MinimumSize = new Size(420, 0);
+            _mainPanel.MaximumSize = new Size(420, int.MaxValue);
+            Controls.Add(_mainPanel);
+            AttachCentering(_mainPanel);
 
-            int currentY = 32;
-
-            mainPanel.Controls.Add(new Label
+            _titleLabel = new Label
             {
-                Text = "Qu\u00EAn m\u1EADt kh\u1EA9u",
+                Text = "Quên mật khẩu",
                 Font = new Font("Segoe UI", 24, FontStyle.Bold),
                 ForeColor = Color.White,
-                Size = new Size(mainPanel.Width, 40),
-                Location = new Point(0, currentY),
-                TextAlign = ContentAlignment.MiddleCenter
-            });
-
-            currentY += 60;
-
-            Label instructionsLabel = new Label
-            {
-                Text = "Nh\u1EADp email c\u1EE7a b\u1EA1n \u0111\u1EC3 nh\u1EADn m\u00E3 x\u00E1c minh.",
-                Font = new Font("Segoe UI", 11),
-                ForeColor = SecondaryTextColor,
-                Size = new Size(ContentWidth, 48),
-                Location = new Point(CenterContentX(mainPanel.Width, ContentWidth), currentY),
+                Size = new Size(_mainPanel.Width, 40),
                 TextAlign = ContentAlignment.MiddleCenter
             };
-            mainPanel.Controls.Add(instructionsLabel);
+            _mainPanel.Controls.Add(_titleLabel);
 
-            currentY = instructionsLabel.Bottom + 24;
+            _instructionsLabel = new Label
+            {
+                Text = "Nhập email của bạn để nhận mã xác minh.",
+                Font = new Font("Segoe UI", 11),
+                ForeColor = SecondaryTextColor,
+                Size = new Size(ContentWidth, 0),
+                MaximumSize = new Size(ContentWidth, 0),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            _mainPanel.Controls.Add(_instructionsLabel);
 
-            Label emailLabel = CreateCenteredLabel("Email c\u1EE7a b\u1EA1n", mainPanel.Width, currentY - 20);
-            mainPanel.Controls.Add(emailLabel);
+            _emailLabel = CreateCenteredLabel("Email của bạn", _mainPanel.Width, 0);
+            _mainPanel.Controls.Add(_emailLabel);
 
-            StyledTextBox emailTextBox = new StyledTextBox
+            _emailTextBox = new StyledTextBox
             {
                 Name = "txtEmail",
                 Size = new Size(ContentWidth, 36),
                 Font = new Font("Segoe UI", 12)
             };
-            StyleInputTextBox(emailTextBox);
-            emailTextBox.Location = new Point(CenterContentX(mainPanel.Width, emailTextBox.Width), currentY);
-            emailTextBox.TextChanged += (s, e) => SetValidationState(emailTextBox, ValidationState.Neutral);
-            mainPanel.Controls.Add(emailTextBox);
+            StyleInputTextBox(_emailTextBox);
+            _emailTextBox.TextChanged += (s, e) =>
+            {
+                SetValidationState(_emailTextBox, ValidationState.Neutral);
+                ClearErrorDisplay();
+            };
+            _mainPanel.Controls.Add(_emailTextBox);
 
-            currentY = emailTextBox.Bottom + 24;
-
-            Button nextButton = new Button
+            _nextButton = new Button
             {
                 Name = "btnNext",
-                Text = "Ti\u1EBFp theo",
+                Text = "Tiếp theo",
                 Size = new Size(ContentWidth, 42),
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 Padding = new Padding(0, 2, 0, 2)
             };
-            StylePrimaryButton(nextButton);
-            nextButton.Location = new Point(CenterContentX(mainPanel.Width, nextButton.Width), currentY);
-            nextButton.Click += BtnNext_Click;
-            mainPanel.Controls.Add(nextButton);
-            AcceptButton = nextButton;
+            StylePrimaryButton(_nextButton);
+            _nextButton.Click += BtnNext_Click;
+            _mainPanel.Controls.Add(_nextButton);
+            AcceptButton = _nextButton;
 
-            currentY = nextButton.Bottom + 24;
+            _backLink = CreateLinkLabel("Quay lại đăng nhập", 0, _mainPanel.Width);
+            _backLink.Click += (s, e) => ShowNextForm<LoginContentForm>();
+            _mainPanel.Controls.Add(_backLink);
 
-            LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
-            backLink.Click += (s, e) => ShowNextForm<LoginContentForm>();
-            mainPanel.Controls.Add(backLink);
-
-            currentY = backLink.Bottom + 20;
-
-            Label errorLabel = new Label
+            _errorLabel = new Label
             {
                 Name = "lblError",
-                Size = new Size(ContentWidth, 44),
-                Location = new Point(CenterContentX(mainPanel.Width, ContentWidth), currentY),
+                Size = new Size(ContentWidth, 0),
                 Font = new Font("Segoe UI", 10),
                 ForeColor = Color.FromArgb(255, 107, 107),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Visible = false
             };
-            mainPanel.Controls.Add(errorLabel);
+            _mainPanel.Controls.Add(_errorLabel);
 
-            ActiveControl = emailTextBox;
+            ReflowLayout();
+
+            ActiveControl = _emailTextBox;
         }
 
         private Label CreateCenteredLabel(string text, int parentWidth, int y)
@@ -154,25 +155,27 @@ namespace QLTN.Forms
 
         private async void BtnNext_Click(object sender, EventArgs e)
         {
-            TextBox emailTextBox = Controls.Find("txtEmail", true)[0] as TextBox;
-            Label errorLabel = Controls.Find("lblError", true)[0] as Label;
-            Button triggerButton = sender as Button ?? Controls.Find("btnNext", true)[0] as Button;
-
-            string email = emailTextBox?.Text.Trim() ?? string.Empty;
-            errorLabel.Visible = false;
-            ResetValidationStates(emailTextBox);
-
-            if (string.IsNullOrEmpty(email))
+            if (_emailTextBox == null)
             {
-                ShowError("Vui l\u00F2ng nh\u1EADp email c\u1EE7a b\u1EA1n", emailTextBox);
-                emailTextBox?.Focus();
+                return;
+            }
+
+            string email = _emailTextBox.Text?.Trim() ?? string.Empty;
+
+            ClearErrorDisplay();
+            ResetValidationStates(_emailTextBox);
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ShowError("Vui lòng nhập email của bạn", _emailTextBox);
+                _emailTextBox.Focus();
                 return;
             }
 
             if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
-                ShowError("Email kh\u00F4ng h\u1EE3p l\u1EC7", emailTextBox);
-                emailTextBox?.Focus();
+                ShowError("Email không hợp lệ", _emailTextBox);
+                _emailTextBox.Focus();
                 return;
             }
 
@@ -182,55 +185,59 @@ namespace QLTN.Forms
             {
                 if (!userService.IsEmailRegistered(email))
                 {
-                    ShowError("Email kh\u00F4ng t\u1ED3n t\u1EA1i trong h\u1EC7 th\u1ED1ng", emailTextBox);
-                    SetValidationState(emailTextBox, ValidationState.Error);
-                    emailTextBox?.Focus();
+                    ShowError("Email không tồn tại trong hệ thống", _emailTextBox);
+                    SetValidationState(_emailTextBox, ValidationState.Error);
+                    _emailTextBox.Focus();
                     return;
                 }
 
-                if (triggerButton != null)
+                if (_nextButton != null)
                 {
-                    triggerButton.Enabled = false;
+                    _nextButton.Enabled = false;
                 }
                 Cursor = Cursors.WaitCursor;
 
                 await verificationService.SendVerificationCodeAsync(email);
 
-                SetValidationState(emailTextBox, ValidationState.Success);
+                SetValidationState(_emailTextBox, ValidationState.Success);
 
-                MessageBox.Show("M\u00E3 x\u00E1c th\u1EF1c \u0111\u00E3 \u0111\u01B0\u1EE3c g\u1EEDi \u0111\u1EBFn email c\u1EE7a b\u1EA1n!", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Mã xác thực đã được gửi đến email của bạn!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ShowNextForm(new FormVerification(email));
             }
             catch (ConfigurationErrorsException ex)
             {
-                ShowError($"C\u1EA5u h\u00ECnh email ch\u01B0a \u0111\u1EA7y \u0111\u1EE7: {ex.Message}", emailTextBox);
-                SetValidationState(emailTextBox, ValidationState.Neutral);
+                ShowError($"Cấu hình email chưa đầy đủ: {ex.Message}", _emailTextBox);
+                SetValidationState(_emailTextBox, ValidationState.Neutral);
             }
             catch (InvalidOperationException ex)
             {
-                ShowError(ex.Message, emailTextBox);
-                SetValidationState(emailTextBox, ValidationState.Neutral);
+                ShowError(ex.Message, _emailTextBox);
+                SetValidationState(_emailTextBox, ValidationState.Neutral);
             }
             catch (Exception ex)
             {
-                ShowError($"Kh\u00F4ng th\u1EC3 g\u1EEDi m\u00E3 x\u00E1c th\u1EF1c: {ex.Message}", emailTextBox);
-                SetValidationState(emailTextBox, ValidationState.Neutral);
+                ShowError($"Không thể gửi mã xác thực: {ex.Message}", _emailTextBox);
+                SetValidationState(_emailTextBox, ValidationState.Neutral);
             }
             finally
             {
                 Cursor = previousCursor;
-                if (triggerButton != null)
+                if (_nextButton != null)
                 {
-                    triggerButton.Enabled = true;
+                    _nextButton.Enabled = true;
                 }
             }
         }
 
         private void ShowError(string message, params TextBox[] inputs)
         {
-            Label errorLabel = Controls.Find("lblError", true)[0] as Label;
-            errorLabel.Text = message;
-            errorLabel.Visible = true;
+            if (_errorLabel != null)
+            {
+                _errorLabel.Text = message;
+                _errorLabel.Visible = true;
+                _errorLabel.Height = MeasureLabelHeight(_errorLabel, message);
+                ReflowLayout();
+            }
 
             if (inputs == null)
             {
@@ -241,6 +248,127 @@ namespace QLTN.Forms
             {
                 SetValidationState(input, ValidationState.Error);
             }
+        }
+
+        private void ClearErrorDisplay()
+        {
+            if (_errorLabel == null)
+            {
+                return;
+            }
+
+            if (!_errorLabel.Visible && string.IsNullOrEmpty(_errorLabel.Text))
+            {
+                return;
+            }
+
+            _errorLabel.Visible = false;
+            _errorLabel.Text = string.Empty;
+            _errorLabel.Height = 0;
+            ReflowLayout();
+        }
+
+        private void ReflowLayout()
+        {
+            if (_mainPanel == null)
+            {
+                return;
+            }
+
+            const int panelTopPadding = 32;
+            const int titleSpacing = 56;
+            const int labelToInputSpacing = 8;
+            const int inputSpacing = 24;
+            const int errorSpacingVisible = 18;
+            const int errorSpacingHidden = 12;
+            const int buttonSpacing = 20;
+            const int bottomPadding = 28;
+
+            int currentY = panelTopPadding;
+            int centerX = CenterContentX(_mainPanel.Width, ContentWidth);
+
+            if (_titleLabel != null)
+            {
+                _titleLabel.Left = 0;
+                _titleLabel.Width = _mainPanel.Width;
+                _titleLabel.Top = currentY;
+                currentY += _titleLabel.Height + titleSpacing;
+            }
+
+            if (_instructionsLabel != null)
+            {
+                _instructionsLabel.Left = centerX;
+                _instructionsLabel.Width = ContentWidth;
+                _instructionsLabel.Top = currentY;
+                _instructionsLabel.Height = MeasureLabelHeight(_instructionsLabel, _instructionsLabel.Text);
+                currentY = _instructionsLabel.Bottom + inputSpacing;
+            }
+
+            if (_emailLabel != null)
+            {
+                _emailLabel.Left = centerX;
+                _emailLabel.Top = currentY;
+                _emailLabel.Width = ContentWidth;
+                currentY = _emailLabel.Bottom + labelToInputSpacing;
+            }
+
+            if (_emailTextBox != null)
+            {
+                _emailTextBox.Left = centerX;
+                _emailTextBox.Top = currentY;
+                currentY = _emailTextBox.Bottom + inputSpacing;
+            }
+
+            if (_nextButton != null)
+            {
+                _nextButton.Left = centerX;
+                _nextButton.Top = currentY;
+                currentY = _nextButton.Bottom + buttonSpacing;
+            }
+
+            if (_backLink != null)
+            {
+                _backLink.Left = CenterContentX(_mainPanel.Width, _backLink.Width);
+                _backLink.Top = currentY;
+                currentY = _backLink.Bottom + buttonSpacing;
+            }
+
+            if (_errorLabel != null)
+            {
+                _errorLabel.Left = centerX;
+                _errorLabel.Width = ContentWidth;
+                _errorLabel.Top = currentY;
+                if (_errorLabel.Visible && _errorLabel.Height > 0)
+                {
+                    currentY = _errorLabel.Bottom + errorSpacingVisible;
+                }
+                else
+                {
+                    currentY += errorSpacingHidden;
+                }
+            }
+
+            currentY += bottomPadding;
+
+            _mainPanel.Height = currentY;
+            CenterControl(_mainPanel);
+        }
+
+        private static int MeasureLabelHeight(Label label, string message)
+        {
+            if (label == null || string.IsNullOrEmpty(message))
+            {
+                return 0;
+            }
+
+            Size proposedSize = new Size(ContentWidth, int.MaxValue);
+            Size measuredSize = TextRenderer.MeasureText(
+                message,
+                label.Font,
+                proposedSize,
+                TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+
+            return Math.Max(measuredSize.Height, label.Font.Height);
         }
 
         private void ShowNextForm<TForm>() where TForm : Form, new()
@@ -255,45 +383,39 @@ namespace QLTN.Forms
 
         void IAuthView.PrepareForDisplay()
         {
-            TextBox emailTextBox = FindControlRecursive<TextBox>("txtEmail");
-            Label errorLabel = FindControlRecursive<Label>("lblError");
-            Button nextButton = FindControlRecursive<Button>("btnNext");
+            ClearErrorDisplay();
 
-            if (errorLabel != null)
+            if (_emailTextBox != null)
             {
-                errorLabel.Visible = false;
-                errorLabel.Text = string.Empty;
+                _emailTextBox.Text = string.Empty;
+                ResetValidationStates(_emailTextBox);
             }
 
-            if (emailTextBox != null)
+            if (_nextButton != null)
             {
-                emailTextBox.Text = string.Empty;
-                ResetValidationStates(emailTextBox);
+                AcceptButton = _nextButton;
             }
 
-            if (nextButton != null)
+            if (_emailTextBox != null)
             {
-                AcceptButton = nextButton;
+                ActiveControl = _emailTextBox;
+                _emailTextBox.Focus();
             }
 
-            if (emailTextBox != null)
-            {
-                ActiveControl = emailTextBox;
-                emailTextBox.Focus();
-            }
+            ReflowLayout();
         }
 
         private void InitializeComponent()
         {
             SuspendLayout();
-            // 
+            //
             // FormForgotPassword
-            // 
+            //
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1024, 576);
             Name = "FormForgotPassword";
-            Text = "Qu\u00EAn m\u1EADt kh\u1EA9u";
+            Text = "Quên mật khẩu";
             ResumeLayout(false);
         }
     }

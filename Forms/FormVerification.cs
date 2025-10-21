@@ -1,7 +1,6 @@
 using System;
 using System.Configuration;
 using System.Drawing;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using QLTN.Controls;
@@ -15,6 +14,16 @@ namespace QLTN.Forms
         private static readonly Size TargetFormSize = new Size(1024, 576);
         private readonly string userEmail;
         private readonly EmailVerificationService verificationService = new EmailVerificationService();
+        private Panel _mainPanel;
+        private Label _titleLabel;
+        private Label _instructionLabel;
+        private Label _noteLabel;
+        private Label _codeLabel;
+        private StyledTextBox _codeTextBox;
+        private Button _verifyButton;
+        private LinkLabel _resendLink;
+        private LinkLabel _backLink;
+        private Label _errorLabel;
 
         public FormVerification(string email)
         {
@@ -25,61 +34,61 @@ namespace QLTN.Forms
 
         private void SetupForm()
         {
-            Text = "\u0110\u0103ng nh\u1EADp - X\u00E1c minh";
+            Text = "Đăng nhập - Xác minh";
             Size = TargetFormSize;
             MinimumSize = TargetFormSize;
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.Sizable;
             MaximizeBox = true;
 
-            Panel mainPanel = CreateSurfacePanel(new Size(420, 440));
-            mainPanel.Anchor = AnchorStyles.None;
-            Controls.Add(mainPanel);
-            AttachCentering(mainPanel);
+            SetupControls();
+        }
 
-            int currentY = 36;
+        private void SetupControls()
+        {
+            _mainPanel = CreateSurfacePanel(new Size(420, 420));
+            _mainPanel.Anchor = AnchorStyles.None;
+            _mainPanel.MinimumSize = new Size(420, 0);
+            _mainPanel.MaximumSize = new Size(420, int.MaxValue);
+            Controls.Add(_mainPanel);
+            AttachCentering(_mainPanel);
 
-            mainPanel.Controls.Add(new Label
+            _titleLabel = new Label
             {
-                Text = "X\u00E1c minh",
+                Text = "Xác minh",
                 Font = new Font("Segoe UI", 24, FontStyle.Bold),
                 ForeColor = Color.White,
-                Size = new Size(mainPanel.Width, 40),
-                Location = new Point(0, currentY),
+                Size = new Size(_mainPanel.Width, 40),
                 TextAlign = ContentAlignment.MiddleCenter
-            });
+            };
+            _mainPanel.Controls.Add(_titleLabel);
 
-            currentY += 60;
-
-            Label instructionLabel = new Label
+            _instructionLabel = new Label
             {
-                Text = "Ch\u00FAng t\u00F4i \u0111\u00E3 g\u1EEDi m\u00E3 x\u00E1c th\u1EF1c \u0111\u1EBFn email c\u1EE7a b\u1EA1n.\nVui l\u00F2ng ki\u1EC3m tra v\u00E0 nh\u1EADp m\u00E3 b\u00EAn d\u01B0\u1EDBi.",
+                Text = "Chúng tôi đã gửi mã xác thực đến email của bạn.\nVui lòng kiểm tra và nhập mã bên dưới.",
                 Font = new Font("Segoe UI", 11),
                 ForeColor = SecondaryTextColor,
-                Size = new Size(ContentWidth, 48),
-                Location = new Point(CenterContentX(mainPanel.Width, ContentWidth), currentY),
+                Size = new Size(ContentWidth, 0),
+                MaximumSize = new Size(ContentWidth, 0),
                 TextAlign = ContentAlignment.MiddleCenter
             };
-            mainPanel.Controls.Add(instructionLabel);
+            _mainPanel.Controls.Add(_instructionLabel);
 
-            currentY = instructionLabel.Bottom + 20;
-
-            Label noteLabel = new Label
+            _noteLabel = new Label
             {
-                Text = "L\u01B0u \u00FD: M\u00E3 ch\u1EC9 c\u00F3 hi\u1EC7u l\u1EF1c trong v\u00F2ng 5 ph\u00FAt.",
+                Text = "Lưu ý: Mã chỉ có hiệu lực trong vòng 5 phút.",
                 Font = new Font("Segoe UI", 9, FontStyle.Bold),
                 ForeColor = Color.FromArgb(255, 107, 107),
-                Size = new Size(ContentWidth, 18),
-                Location = new Point(CenterContentX(mainPanel.Width, ContentWidth), currentY),
+                Size = new Size(ContentWidth, 0),
+                MaximumSize = new Size(ContentWidth, 0),
                 TextAlign = ContentAlignment.MiddleCenter
             };
-            mainPanel.Controls.Add(noteLabel);
+            _mainPanel.Controls.Add(_noteLabel);
 
-            currentY = noteLabel.Bottom + 24;
+            _codeLabel = CreateCenteredLabel("Mã xác minh", _mainPanel.Width, 0);
+            _mainPanel.Controls.Add(_codeLabel);
 
-            mainPanel.Controls.Add(CreateCenteredLabel("M\u00E3 x\u00E1c minh", mainPanel.Width, currentY));
-
-            StyledTextBox codeTextBox = new StyledTextBox
+            _codeTextBox = new StyledTextBox
             {
                 Name = "txtCode",
                 Size = new Size(ContentWidth, 36),
@@ -87,65 +96,46 @@ namespace QLTN.Forms
                 MaxLength = 6,
                 TextAlign = HorizontalAlignment.Center
             };
-            StyleInputTextBox(codeTextBox);
-            codeTextBox.Location = new Point(CenterContentX(mainPanel.Width, codeTextBox.Width), currentY + 22);
-            codeTextBox.TextChanged += (s, e) =>
-            {
-                string digitsOnly = Regex.Replace(codeTextBox.Text, @"[^\d]", "");
-                if (digitsOnly != codeTextBox.Text)
-                {
-                    int caret = codeTextBox.SelectionStart - (codeTextBox.Text.Length - digitsOnly.Length);
-                    codeTextBox.Text = digitsOnly;
-                    codeTextBox.SelectionStart = Math.Max(caret, 0);
-                }
-                SetValidationState(codeTextBox, ValidationState.Neutral);
-            };
-            mainPanel.Controls.Add(codeTextBox);
+            StyleInputTextBox(_codeTextBox);
+            _codeTextBox.TextChanged += CodeTextBox_TextChanged;
+            _mainPanel.Controls.Add(_codeTextBox);
 
-            currentY = codeTextBox.Bottom + 24;
-
-            Button verifyButton = new Button
+            _verifyButton = new Button
             {
                 Name = "btnVerify",
-                Text = "X\u00E1c minh",
+                Text = "Xác minh",
                 Size = new Size(ContentWidth, 42),
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 Padding = new Padding(0, 2, 0, 2)
             };
-            StylePrimaryButton(verifyButton);
-            verifyButton.Location = new Point(CenterContentX(mainPanel.Width, verifyButton.Width), currentY);
-            verifyButton.Click += BtnVerify_Click;
-            mainPanel.Controls.Add(verifyButton);
-            AcceptButton = verifyButton;
+            StylePrimaryButton(_verifyButton);
+            _verifyButton.Click += BtnVerify_Click;
+            _mainPanel.Controls.Add(_verifyButton);
+            AcceptButton = _verifyButton;
 
-            currentY = verifyButton.Bottom + 20;
+            _resendLink = CreateLinkLabel("Gửi lại mã xác minh", 0, _mainPanel.Width);
+            _resendLink.Name = "lnkResend";
+            _resendLink.Click += ResendLink_Click;
+            _mainPanel.Controls.Add(_resendLink);
 
-            LinkLabel resendLink = CreateLinkLabel("G\u1EEDi l\u1EA1i m\u00E3 x\u00E1c minh", currentY, mainPanel.Width);
-            resendLink.Name = "lnkResend";
-            resendLink.Click += ResendLink_Click;
-            mainPanel.Controls.Add(resendLink);
+            _backLink = CreateLinkLabel("Quay lại đăng nhập", 0, _mainPanel.Width);
+            _backLink.Click += (s, e) => ShowNextForm<LoginContentForm>();
+            _mainPanel.Controls.Add(_backLink);
 
-            currentY = resendLink.Bottom + 12;
-
-            LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
-            backLink.Click += (s, e) => ShowNextForm<LoginContentForm>();
-            mainPanel.Controls.Add(backLink);
-
-            currentY = backLink.Bottom + 16;
-
-            Label errorLabel = new Label
+            _errorLabel = new Label
             {
                 Name = "lblError",
-                Size = new Size(ContentWidth, 36),
-                Location = new Point(CenterContentX(mainPanel.Width, ContentWidth), currentY),
+                Size = new Size(ContentWidth, 0),
                 Font = new Font("Segoe UI", 10),
                 ForeColor = Color.FromArgb(255, 107, 107),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Visible = false
             };
-            mainPanel.Controls.Add(errorLabel);
+            _mainPanel.Controls.Add(_errorLabel);
 
-            ActiveControl = codeTextBox;
+            ReflowLayout();
+
+            ActiveControl = _codeTextBox;
         }
 
         private Label CreateCenteredLabel(string text, int parentWidth, int y)
@@ -179,27 +169,48 @@ namespace QLTN.Forms
             return link;
         }
 
+        private void CodeTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (_codeTextBox == null)
+            {
+                return;
+            }
+
+            string digitsOnly = Regex.Replace(_codeTextBox.Text, @"[^\d]", string.Empty);
+            if (digitsOnly != _codeTextBox.Text)
+            {
+                int caret = _codeTextBox.SelectionStart - (_codeTextBox.Text.Length - digitsOnly.Length);
+                _codeTextBox.Text = digitsOnly;
+                _codeTextBox.SelectionStart = Math.Max(caret, 0);
+            }
+
+            SetValidationState(_codeTextBox, ValidationState.Neutral);
+            ClearErrorDisplay();
+        }
+
         private async void BtnVerify_Click(object sender, EventArgs e)
         {
-            TextBox codeTextBox = Controls.Find("txtCode", true)[0] as TextBox;
-            Label errorLabel = Controls.Find("lblError", true)[0] as Label;
-            Button verifyButton = sender as Button ?? Controls.Find("btnVerify", true).FirstOrDefault() as Button;
+            if (_codeTextBox == null)
+            {
+                return;
+            }
 
-            string code = codeTextBox?.Text.Trim() ?? string.Empty;
-            errorLabel.Visible = false;
-            ResetValidationStates(codeTextBox);
+            string code = _codeTextBox.Text?.Trim() ?? string.Empty;
+
+            ClearErrorDisplay();
+            ResetValidationStates(_codeTextBox);
 
             if (string.IsNullOrEmpty(code))
             {
-                ShowError("Vui l\u00F2ng nh\u1EADp m\u00E3 x\u00E1c minh", codeTextBox);
-                codeTextBox?.Focus();
+                ShowError("Vui lòng nhập mã xác minh", _codeTextBox);
+                _codeTextBox.Focus();
                 return;
             }
 
             if (code.Length != 6)
             {
-                ShowError("M\u00E3 x\u00E1c minh ph\u1EA3i c\u00F3 6 ch\u1EEF s\u1ED1", codeTextBox);
-                codeTextBox?.Focus();
+                ShowError("Mã xác minh phải có 6 chữ số", _codeTextBox);
+                _codeTextBox.Focus();
                 return;
             }
 
@@ -207,9 +218,9 @@ namespace QLTN.Forms
 
             try
             {
-                if (verifyButton != null)
+                if (_verifyButton != null)
                 {
-                    verifyButton.Enabled = false;
+                    _verifyButton.Enabled = false;
                 }
 
                 Cursor = Cursors.WaitCursor;
@@ -220,98 +231,99 @@ namespace QLTN.Forms
                 switch (status)
                 {
                     case EmailVerificationService.VerificationStatus.Success:
-                        SetValidationState(codeTextBox, ValidationState.Success);
-                        MessageBox.Show("X\u00E1c minh th\u00E0nh c\u00F4ng!", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        SetValidationState(_codeTextBox, ValidationState.Success);
+                        MessageBox.Show("Xác minh thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         ShowNextForm(new FormResetPassword(userEmail));
                         break;
                     case EmailVerificationService.VerificationStatus.NotRequested:
-                        ShowError("Kh\u00F4ng t\u00ECm th\u1EA5y y\u00EAu c\u1EA7u x\u00E1c th\u1EF1c. Vui l\u00F2ng g\u1EEDi l\u1EA1i m\u00E3.", codeTextBox);
-                        codeTextBox?.Focus();
+                        ShowError("Không tìm thấy yêu cầu xác thực. Vui lòng gửi lại mã.", _codeTextBox);
+                        _codeTextBox.Focus();
                         break;
                     case EmailVerificationService.VerificationStatus.Expired:
-                        ShowError("M\u00E3 x\u00E1c minh \u0111\u00E3 h\u1EBFt h\u1EA1n. Vui l\u00F2ng g\u1EEDi l\u1EA1i m\u00E3.", codeTextBox);
-                        codeTextBox?.Focus();
+                        ShowError("Mã xác minh đã hết hạn. Vui lòng gửi lại mã.", _codeTextBox);
+                        _codeTextBox.Focus();
                         break;
                     default:
-                        ShowError("M\u00E3 x\u00E1c minh kh\u00F4ng ch\u00EDnh x\u00E1c", codeTextBox);
-                        codeTextBox?.Focus();
+                        ShowError("Mã xác minh không chính xác", _codeTextBox);
+                        _codeTextBox.Focus();
                         break;
                 }
             }
             catch (InvalidOperationException ex)
             {
-                ShowError(ex.Message, codeTextBox);
-                codeTextBox?.Focus();
+                ShowError(ex.Message, _codeTextBox);
+                _codeTextBox.Focus();
             }
             catch (Exception ex)
             {
-                ShowError($"Kh\u00F4ng th\u1EC3 x\u00E1c minh m\u00E3: {ex.Message}", codeTextBox);
-                codeTextBox?.Focus();
+                ShowError($"Không thể xác minh mã: {ex.Message}", _codeTextBox);
+                _codeTextBox.Focus();
             }
             finally
             {
                 Cursor = previousCursor;
-                if (verifyButton != null)
+                if (_verifyButton != null)
                 {
-                    verifyButton.Enabled = true;
+                    _verifyButton.Enabled = true;
                 }
             }
         }
 
         private async void ResendLink_Click(object sender, EventArgs e)
         {
-            TextBox codeTextBox = Controls.Find("txtCode", true)[0] as TextBox;
-            Label errorLabel = Controls.Find("lblError", true)[0] as Label;
-            LinkLabel resendLink = sender as LinkLabel ?? Controls.Find("lnkResend", true)[0] as LinkLabel;
-
-            errorLabel.Visible = false;
-            if (codeTextBox != null)
+            if (_codeTextBox != null)
             {
-                codeTextBox.Text = string.Empty;
-                ResetValidationStates(codeTextBox);
+                _codeTextBox.Text = string.Empty;
+                ResetValidationStates(_codeTextBox);
             }
+
+            ClearErrorDisplay();
 
             Cursor previousCursor = Cursor;
 
             try
             {
-                if (resendLink != null)
+                if (_resendLink != null)
                 {
-                    resendLink.Enabled = false;
+                    _resendLink.Enabled = false;
                 }
                 Cursor = Cursors.WaitCursor;
 
                 await verificationService.ResendCodeAsync(userEmail);
 
-                MessageBox.Show("M\u00E3 x\u00E1c minh m\u1EDBi \u0111\u00E3 \u0111\u01B0\u1EE3c g\u1EEDi!", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Mã xác minh mới đã được gửi!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (ConfigurationErrorsException ex)
             {
-                ShowError($"C\u1EA5u h\u00ECnh email ch\u01B0a \u0111\u1EA7y \u0111\u1EE7: {ex.Message}", codeTextBox);
+                ShowError($"Cấu hình email chưa đầy đủ: {ex.Message}", _codeTextBox);
             }
             catch (InvalidOperationException ex)
             {
-                ShowError(ex.Message, codeTextBox);
+                ShowError(ex.Message, _codeTextBox);
             }
             catch (Exception ex)
             {
-                ShowError($"Kh\u00F4ng th\u1EC3 g\u1EEDi m\u00E3 x\u00E1c th\u1EF1c: {ex.Message}", codeTextBox);
+                ShowError($"Không thể gửi mã xác thực: {ex.Message}", _codeTextBox);
             }
             finally
             {
                 Cursor = previousCursor;
-                if (resendLink != null)
+                if (_resendLink != null)
                 {
-                    resendLink.Enabled = true;
+                    _resendLink.Enabled = true;
                 }
             }
         }
 
         private void ShowError(string message, params TextBox[] inputs)
         {
-            Label errorLabel = Controls.Find("lblError", true)[0] as Label;
-            errorLabel.Text = message;
-            errorLabel.Visible = true;
+            if (_errorLabel != null)
+            {
+                _errorLabel.Text = message;
+                _errorLabel.Visible = true;
+                _errorLabel.Height = MeasureLabelHeight(_errorLabel, message);
+                ReflowLayout();
+            }
 
             if (inputs == null)
             {
@@ -322,6 +334,145 @@ namespace QLTN.Forms
             {
                 SetValidationState(input, ValidationState.Error);
             }
+        }
+
+        private void ClearErrorDisplay()
+        {
+            if (_errorLabel == null)
+            {
+                return;
+            }
+
+            if (!_errorLabel.Visible && string.IsNullOrEmpty(_errorLabel.Text))
+            {
+                return;
+            }
+
+            _errorLabel.Visible = false;
+            _errorLabel.Text = string.Empty;
+            _errorLabel.Height = 0;
+            ReflowLayout();
+        }
+
+        private void ReflowLayout()
+        {
+            if (_mainPanel == null)
+            {
+                return;
+            }
+
+            const int panelTopPadding = 36;
+            const int titleSpacing = 56;
+            const int instructionSpacing = 16;
+            const int noteSpacing = 24;
+            const int labelToInputSpacing = 12;
+            const int buttonSpacing = 22;
+            const int linkSpacing = 12;
+            const int errorSpacingVisible = 18;
+            const int errorSpacingHidden = 10;
+            const int bottomPadding = 28;
+
+            int currentY = panelTopPadding;
+            int centerX = CenterContentX(_mainPanel.Width, ContentWidth);
+
+            if (_titleLabel != null)
+            {
+                _titleLabel.Left = 0;
+                _titleLabel.Width = _mainPanel.Width;
+                _titleLabel.Top = currentY;
+                currentY += _titleLabel.Height + titleSpacing;
+            }
+
+            if (_instructionLabel != null)
+            {
+                _instructionLabel.Left = centerX;
+                _instructionLabel.Width = ContentWidth;
+                _instructionLabel.Top = currentY;
+                _instructionLabel.Height = MeasureLabelHeight(_instructionLabel, _instructionLabel.Text);
+                currentY = _instructionLabel.Bottom + instructionSpacing;
+            }
+
+            if (_noteLabel != null)
+            {
+                _noteLabel.Left = centerX;
+                _noteLabel.Width = ContentWidth;
+                _noteLabel.Top = currentY;
+                _noteLabel.Height = MeasureLabelHeight(_noteLabel, _noteLabel.Text);
+                currentY = _noteLabel.Bottom + noteSpacing;
+            }
+
+            if (_codeLabel != null)
+            {
+                _codeLabel.Left = centerX;
+                _codeLabel.Width = ContentWidth;
+                _codeLabel.Top = currentY;
+                currentY = _codeLabel.Bottom + labelToInputSpacing;
+            }
+
+            if (_codeTextBox != null)
+            {
+                _codeTextBox.Left = centerX;
+                _codeTextBox.Top = currentY;
+                currentY = _codeTextBox.Bottom + buttonSpacing;
+            }
+
+            if (_verifyButton != null)
+            {
+                _verifyButton.Left = centerX;
+                _verifyButton.Top = currentY;
+                currentY = _verifyButton.Bottom + linkSpacing;
+            }
+
+            if (_resendLink != null)
+            {
+                _resendLink.Left = CenterContentX(_mainPanel.Width, _resendLink.Width);
+                _resendLink.Top = currentY;
+                currentY = _resendLink.Bottom + linkSpacing;
+            }
+
+            if (_backLink != null)
+            {
+                _backLink.Left = CenterContentX(_mainPanel.Width, _backLink.Width);
+                _backLink.Top = currentY;
+                currentY = _backLink.Bottom + linkSpacing;
+            }
+
+            if (_errorLabel != null)
+            {
+                _errorLabel.Left = centerX;
+                _errorLabel.Width = ContentWidth;
+                _errorLabel.Top = currentY;
+                if (_errorLabel.Visible && _errorLabel.Height > 0)
+                {
+                    currentY = _errorLabel.Bottom + errorSpacingVisible;
+                }
+                else
+                {
+                    currentY += errorSpacingHidden;
+                }
+            }
+
+            currentY += bottomPadding;
+
+            _mainPanel.Height = currentY;
+            CenterControl(_mainPanel);
+        }
+
+        private static int MeasureLabelHeight(Label label, string message)
+        {
+            if (label == null || string.IsNullOrEmpty(message))
+            {
+                return 0;
+            }
+
+            Size proposedSize = new Size(ContentWidth, int.MaxValue);
+            Size measuredSize = TextRenderer.MeasureText(
+                message,
+                label.Font,
+                proposedSize,
+                TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+
+            return Math.Max(measuredSize.Height, label.Font.Height);
         }
 
         private void ShowNextForm<TForm>() where TForm : Form, new()
@@ -344,7 +495,7 @@ namespace QLTN.Forms
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1024, 576);
             Name = "FormVerification";
-            Text = "X\u00E1c minh";
+            Text = "Xác minh";
             ResumeLayout(false);
         }
     }

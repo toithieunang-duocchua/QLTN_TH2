@@ -8,5 +8,3 @@
 # NuGet packages (restore on demand)
 /packages/
 
-# User-specific config
-App.config

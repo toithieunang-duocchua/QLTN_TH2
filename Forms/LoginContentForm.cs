@@ -13,6 +13,16 @@ namespace QLTN.Forms
         private const int ContentWidth = 320;
         private static readonly Size TargetFormSize = new Size(1024, 576);
         private readonly UserService userService = new UserService();
+        private Panel _mainPanel;
+        private Label _titleLabel;
+        private Label _phoneLabel;
+        private StyledTextBox _phoneTextBox;
+        private Label _passwordLabel;
+        private StyledTextBox _passwordTextBox;
+        private Button _loginButton;
+        private LinkLabel _forgotPasswordLink;
+        private LinkLabel _registerLink;
+        private Label _errorLabel;
 
         public LoginContentForm()
         {
@@ -22,7 +32,7 @@ namespace QLTN.Forms
 
         private void SetupForm()
         {
-            Text = "\u0110\u0103ng nh\u1EADp - H\u1EC7 th\u1ED1ng QLTN";
+            Text = "Đăng nhập - Hệ thống QLTN";
             Size = TargetFormSize;
             MinimumSize = TargetFormSize;
 
@@ -35,116 +45,90 @@ namespace QLTN.Forms
 
         private void SetupControls()
         {
-            Panel mainPanel = CreateSurfacePanel(new Size(420, 420));
-            mainPanel.Anchor = AnchorStyles.None;
-            Controls.Add(mainPanel);
-            AttachCentering(mainPanel);
+            _mainPanel = CreateSurfacePanel(new Size(420, 400));
+            _mainPanel.Anchor = AnchorStyles.None;
+            _mainPanel.MinimumSize = new Size(420, 0);
+            _mainPanel.MaximumSize = new Size(420, int.MaxValue);
+            Controls.Add(_mainPanel);
+            AttachCentering(_mainPanel);
 
-            int currentY = 40;
-
-            mainPanel.Controls.Add(new Label
+            _titleLabel = new Label
             {
-                Text = "\u0110\u0103ng nh\u1EADp",
+                Text = "Đăng nhập",
                 Font = new Font("Segoe UI", 24, FontStyle.Bold),
                 ForeColor = Color.White,
-                Size = new Size(mainPanel.Width, 40),
-                Location = new Point(0, currentY),
+                Size = new Size(_mainPanel.Width, 40),
                 TextAlign = ContentAlignment.MiddleCenter
-            });
+            };
+            _mainPanel.Controls.Add(_titleLabel);
 
-            currentY += 70;
+            _phoneLabel = CreateCenteredLabel("Số điện thoại", _mainPanel.Width, 0);
+            _mainPanel.Controls.Add(_phoneLabel);
 
-            Label phoneLabel = CreateCenteredLabel("S\u1ED1 \u0111i\u1EC7n tho\u1EA1i", mainPanel.Width, currentY);
-            mainPanel.Controls.Add(phoneLabel);
-
-            StyledTextBox phoneTextBox = new StyledTextBox
+            _phoneTextBox = new StyledTextBox
             {
                 Name = "txtPhone",
                 Size = new Size(ContentWidth, 36),
                 Font = new Font("Segoe UI", 12),
                 MaxLength = 10
             };
-            StyleInputTextBox(phoneTextBox);
-            phoneTextBox.Location = new Point(CenterContentX(mainPanel.Width, phoneTextBox.Width), currentY + 28);
-            phoneTextBox.TextChanged += (s, e) =>
-            {
-                string digitsOnly = Regex.Replace(phoneTextBox.Text, @"[^\d]", "");
-                if (digitsOnly != phoneTextBox.Text)
-                {
-                    int caret = phoneTextBox.SelectionStart - (phoneTextBox.Text.Length - digitsOnly.Length);
-                    phoneTextBox.Text = digitsOnly;
-                    phoneTextBox.SelectionStart = Math.Max(caret, 0);
-                }
-                SetValidationState(phoneTextBox, ValidationState.Neutral);
-            };
-            mainPanel.Controls.Add(phoneTextBox);
+            StyleInputTextBox(_phoneTextBox);
+            _phoneTextBox.TextChanged += PhoneTextBox_TextChanged;
+            _mainPanel.Controls.Add(_phoneTextBox);
 
-            currentY = phoneTextBox.Bottom + 30;
+            _passwordLabel = CreateCenteredLabel("Mật khẩu", _mainPanel.Width, 0);
+            _mainPanel.Controls.Add(_passwordLabel);
 
-            Label passwordLabel = CreateCenteredLabel("M\u1EADt kh\u1EA9u", mainPanel.Width, currentY);
-            mainPanel.Controls.Add(passwordLabel);
-
-            StyledTextBox passwordTextBox = new StyledTextBox
+            _passwordTextBox = new StyledTextBox
             {
                 Name = "txtPassword",
                 Size = new Size(ContentWidth, 36),
                 Font = new Font("Segoe UI", 12),
                 UseSystemPasswordChar = true
             };
-            StyleInputTextBox(passwordTextBox);
-            passwordTextBox.Location = new Point(CenterContentX(mainPanel.Width, passwordTextBox.Width), currentY + 28);
-            passwordTextBox.TextChanged += (s, e) => SetValidationState(passwordTextBox, ValidationState.Neutral);
-            mainPanel.Controls.Add(passwordTextBox);
+            StyleInputTextBox(_passwordTextBox);
+            _passwordTextBox.TextChanged += (s, e) =>
+            {
+                SetValidationState(_passwordTextBox, ValidationState.Neutral);
+                ClearErrorDisplay();
+            };
+            _mainPanel.Controls.Add(_passwordTextBox);
 
-            currentY = passwordTextBox.Bottom + 30;
-
-            Button loginButton = new Button
+            _loginButton = new Button
             {
                 Name = "btnLogin",
-                Text = "\u0110\u0103ng nh\u1EADp",
+                Text = "Đăng nhập",
                 Size = new Size(ContentWidth, 42),
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 Padding = new Padding(0, 2, 0, 2)
             };
-            StylePrimaryButton(loginButton);
-            loginButton.Location = new Point(CenterContentX(mainPanel.Width, loginButton.Width), currentY);
-            loginButton.Click += BtnLogin_Click;
-            mainPanel.Controls.Add(loginButton);
-            AcceptButton = loginButton;
+            StylePrimaryButton(_loginButton);
+            _loginButton.Click += BtnLogin_Click;
+            _mainPanel.Controls.Add(_loginButton);
+            AcceptButton = _loginButton;
 
-            currentY = loginButton.Bottom + 30;
+            _forgotPasswordLink = CreateLinkLabel("Bạn quên mật khẩu?", 0, _mainPanel.Width);
+            _forgotPasswordLink.Click += (s, e) => ShowNextForm<FormForgotPassword>();
+            _mainPanel.Controls.Add(_forgotPasswordLink);
 
-            LinkLabel forgotPasswordLink = CreateLinkLabel("B\u1EA1n qu\u00EAn m\u1EADt kh\u1EA9u?", currentY, mainPanel.Width);
-            forgotPasswordLink.Click += (s, e) =>
-            {
-                ShowNextForm<FormForgotPassword>();
-            };
-            mainPanel.Controls.Add(forgotPasswordLink);
+            _registerLink = CreateLinkLabel("Tạo tài khoản", 0, _mainPanel.Width);
+            _registerLink.Click += (s, e) => ShowNextForm<FormRegister>();
+            _mainPanel.Controls.Add(_registerLink);
 
-            currentY += 35;
-
-            LinkLabel registerLink = CreateLinkLabel("T\u1EA1o t\u00E0i kho\u1EA3n", currentY, mainPanel.Width);
-            registerLink.Click += (s, e) =>
-            {
-                ShowNextForm<FormRegister>();
-            };
-            mainPanel.Controls.Add(registerLink);
-
-            currentY += 35;
-
-            Label errorLabel = new Label
+            _errorLabel = new Label
             {
                 Name = "lblError",
-                Size = new Size(ContentWidth, 36),
-                Location = new Point(CenterContentX(mainPanel.Width, ContentWidth), currentY),
+                Size = new Size(ContentWidth, 0),
                 Font = new Font("Segoe UI", 10),
                 ForeColor = Color.FromArgb(255, 107, 107),
                 TextAlign = ContentAlignment.MiddleCenter,
                 Visible = false
             };
-            mainPanel.Controls.Add(errorLabel);
+            _mainPanel.Controls.Add(_errorLabel);
 
-            ActiveControl = phoneTextBox;
+            ReflowLayout();
+
+            ActiveControl = _phoneTextBox;
         }
 
         private Label CreateCenteredLabel(string text, int parentWidth, int y)
@@ -178,45 +162,63 @@ namespace QLTN.Forms
             return link;
         }
 
+        private void PhoneTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (_phoneTextBox == null)
+            {
+                return;
+            }
+
+            string digitsOnly = Regex.Replace(_phoneTextBox.Text, @"[^\d]", string.Empty);
+            if (digitsOnly != _phoneTextBox.Text)
+            {
+                int caret = _phoneTextBox.SelectionStart - (_phoneTextBox.Text.Length - digitsOnly.Length);
+                _phoneTextBox.Text = digitsOnly;
+                _phoneTextBox.SelectionStart = Math.Max(caret, 0);
+            }
+
+            SetValidationState(_phoneTextBox, ValidationState.Neutral);
+            ClearErrorDisplay();
+        }
+
         private void BtnLogin_Click(object sender, EventArgs e)
         {
-            TextBox phoneTextBox = Controls.Find("txtPhone", true)[0] as TextBox;
-            TextBox passwordTextBox = Controls.Find("txtPassword", true)[0] as TextBox;
-            Label errorLabel = Controls.Find("lblError", true)[0] as Label;
-
-            string phone = phoneTextBox.Text.Trim();
-            string password = passwordTextBox.Text;
-
-            errorLabel.Visible = false;
-            ResetValidationStates(phoneTextBox, passwordTextBox);
-
-            if (string.IsNullOrEmpty(phone))
+            if (_phoneTextBox == null || _passwordTextBox == null)
             {
-                ShowError("Vui l\u00F2ng nh\u1EADp s\u1ED1 \u0111i\u1EC7n tho\u1EA1i", phoneTextBox);
-                phoneTextBox.Focus();
                 return;
             }
 
-            if (!phone.StartsWith("0") || phone.Length != 10)
+            string phone = _phoneTextBox.Text?.Trim() ?? string.Empty;
+            string password = _passwordTextBox.Text ?? string.Empty;
+
+            ClearErrorDisplay();
+            ResetValidationStates(_phoneTextBox, _passwordTextBox);
+
+            if (string.IsNullOrWhiteSpace(phone))
             {
-                ShowError("S\u1ED1 \u0111i\u1EC7n tho\u1EA1i ph\u1EA3i c\u00F3 10 ch\u1EEF s\u1ED1 v\u00E0 b\u1EAFt \u0111\u1EA7u b\u1EB1ng s\u1ED1 0", phoneTextBox);
-                phoneTextBox.Focus();
+                ShowError("Vui lòng nhập số điện thoại", _phoneTextBox);
+                _phoneTextBox.Focus();
                 return;
             }
 
-            if (!userService.IsPhoneRegistered(phone))
+            if (phone.Length != 10)
             {
-                ShowError("S\u1ED1 \u0111i\u1EC7n tho\u1EA1i ch\u01B0a \u0111\u01B0\u1EE3c \u0111\u0103ng k\u00FD", phoneTextBox);
-                phoneTextBox.Focus();
+                ShowError("Số điện thoại phải có 10 chữ số", _phoneTextBox);
+                _phoneTextBox.Focus();
                 return;
             }
 
-            SetValidationState(phoneTextBox, ValidationState.Success);
-
-            if (string.IsNullOrEmpty(password))
+            if (!Regex.IsMatch(phone, @"^\d{10}$"))
             {
-                ShowError("Vui l\u00F2ng nh\u1EADp m\u1EADt kh\u1EA9u", passwordTextBox);
-                passwordTextBox.Focus();
+                ShowError("Số điện thoại chỉ bao gồm chữ số", _phoneTextBox);
+                _phoneTextBox.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                ShowError("Vui lòng nhập mật khẩu", _passwordTextBox);
+                _passwordTextBox.Focus();
                 return;
             }
 
@@ -230,26 +232,30 @@ namespace QLTN.Forms
 
                 if (userService.Authenticate(request))
                 {
-                    MessageBox.Show("\u0110\u0103ng nh\u1EADp th\u00E0nh c\u00F4ng!", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    SetValidationState(passwordTextBox, ValidationState.Success);
+                    MessageBox.Show("Đăng nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    SetValidationState(_passwordTextBox, ValidationState.Success);
                     ShowNextForm(new FormMainSystem());
                 }
                 else
                 {
-                    ShowError("S\u1ED1 \u0111i\u1EC7n tho\u1EA1i ho\u1EB7c m\u1EADt kh\u1EA9u kh\u00F4ng ch\u00EDnh x\u00E1c", phoneTextBox, passwordTextBox);
+                    ShowError("Số điện thoại hoặc mật khẩu không chính xác", _phoneTextBox, _passwordTextBox);
                 }
             }
             catch (Exception ex)
             {
-                ShowError($"L\u1ED7i x\u00E1c th\u1EF1c: {ex.Message}", phoneTextBox, passwordTextBox);
+                ShowError($"Lỗi xác thực: {ex.Message}", _phoneTextBox, _passwordTextBox);
             }
         }
 
         private void ShowError(string message, params TextBox[] inputs)
         {
-            Label errorLabel = Controls.Find("lblError", true)[0] as Label;
-            errorLabel.Text = message;
-            errorLabel.Visible = true;
+            if (_errorLabel != null)
+            {
+                _errorLabel.Text = message;
+                _errorLabel.Visible = true;
+                _errorLabel.Height = MeasureLabelHeight(_errorLabel, message);
+                ReflowLayout();
+            }
 
             if (inputs == null)
             {
@@ -260,6 +266,141 @@ namespace QLTN.Forms
             {
                 SetValidationState(input, ValidationState.Error);
             }
+        }
+
+        private void ClearErrorDisplay()
+        {
+            if (_errorLabel == null)
+            {
+                return;
+            }
+
+            if (!_errorLabel.Visible && string.IsNullOrEmpty(_errorLabel.Text))
+            {
+                return;
+            }
+
+            _errorLabel.Visible = false;
+            _errorLabel.Text = string.Empty;
+            _errorLabel.Height = 0;
+            ReflowLayout();
+        }
+
+        private void ReflowLayout()
+        {
+            if (_mainPanel == null)
+            {
+                return;
+            }
+
+            const int panelTopPadding = 36;
+            const int titleSpacing = 60;
+            const int labelToInputSpacing = 10;
+            const int sectionSpacing = 26;
+            const int buttonSpacing = 24;
+            const int linkSpacing = 16;
+            const int errorSpacingVisible = 18;
+            const int errorSpacingHidden = 12;
+            const int bottomPadding = 30;
+
+            int currentY = panelTopPadding;
+            int centerX = CenterContentX(_mainPanel.Width, ContentWidth);
+
+            if (_titleLabel != null)
+            {
+                _titleLabel.Left = 0;
+                _titleLabel.Width = _mainPanel.Width;
+                _titleLabel.Top = currentY;
+                currentY += _titleLabel.Height + titleSpacing;
+            }
+
+            if (_phoneLabel != null)
+            {
+                _phoneLabel.Left = centerX;
+                _phoneLabel.Width = ContentWidth;
+                _phoneLabel.Top = currentY;
+                currentY = _phoneLabel.Bottom + labelToInputSpacing;
+            }
+
+            if (_phoneTextBox != null)
+            {
+                _phoneTextBox.Left = centerX;
+                _phoneTextBox.Top = currentY;
+                currentY = _phoneTextBox.Bottom + sectionSpacing;
+            }
+
+            if (_passwordLabel != null)
+            {
+                _passwordLabel.Left = centerX;
+                _passwordLabel.Width = ContentWidth;
+                _passwordLabel.Top = currentY;
+                currentY = _passwordLabel.Bottom + labelToInputSpacing;
+            }
+
+            if (_passwordTextBox != null)
+            {
+                _passwordTextBox.Left = centerX;
+                _passwordTextBox.Top = currentY;
+                currentY = _passwordTextBox.Bottom + buttonSpacing;
+            }
+
+            if (_loginButton != null)
+            {
+                _loginButton.Left = centerX;
+                _loginButton.Top = currentY;
+                currentY = _loginButton.Bottom + linkSpacing;
+            }
+
+            if (_forgotPasswordLink != null)
+            {
+                _forgotPasswordLink.Left = CenterContentX(_mainPanel.Width, _forgotPasswordLink.Width);
+                _forgotPasswordLink.Top = currentY;
+                currentY = _forgotPasswordLink.Bottom + linkSpacing;
+            }
+
+            if (_registerLink != null)
+            {
+                _registerLink.Left = CenterContentX(_mainPanel.Width, _registerLink.Width);
+                _registerLink.Top = currentY;
+                currentY = _registerLink.Bottom + linkSpacing;
+            }
+
+            if (_errorLabel != null)
+            {
+                _errorLabel.Left = centerX;
+                _errorLabel.Width = ContentWidth;
+                _errorLabel.Top = currentY;
+                if (_errorLabel.Visible && _errorLabel.Height > 0)
+                {
+                    currentY = _errorLabel.Bottom + errorSpacingVisible;
+                }
+                else
+                {
+                    currentY += errorSpacingHidden;
+                }
+            }
+
+            currentY += bottomPadding;
+
+            _mainPanel.Height = currentY;
+            CenterControl(_mainPanel);
+        }
+
+        private static int MeasureLabelHeight(Label label, string message)
+        {
+            if (label == null || string.IsNullOrEmpty(message))
+            {
+                return 0;
+            }
+
+            Size proposedSize = new Size(ContentWidth, int.MaxValue);
+            Size measuredSize = TextRenderer.MeasureText(
+                message,
+                label.Font,
+                proposedSize,
+                TextFormatFlags.WordBreak | TextFormatFlags.NoPadding);
+
+            return Math.Max(measuredSize.Height, label.Font.Height);
         }
 
         private void ShowNextForm<TForm>() where TForm : Form, new()
@@ -298,52 +439,45 @@ namespace QLTN.Forms
 
         void IAuthView.PrepareForDisplay()
         {
-            TextBox phoneTextBox = FindControlRecursive<TextBox>("txtPhone");
-            TextBox passwordTextBox = FindControlRecursive<TextBox>("txtPassword");
-            Label errorLabel = FindControlRecursive<Label>("lblError");
-            Button loginButton = FindControlRecursive<Button>("btnLogin");
+            ClearErrorDisplay();
 
-            if (errorLabel != null)
+            if (_phoneTextBox != null)
             {
-                errorLabel.Visible = false;
-                errorLabel.Text = string.Empty;
+                _phoneTextBox.Text = string.Empty;
             }
 
-            if (phoneTextBox != null)
+            if (_passwordTextBox != null)
             {
-                phoneTextBox.Text = string.Empty;
+                _passwordTextBox.Text = string.Empty;
             }
 
-            if (passwordTextBox != null)
+            ResetValidationStates(_phoneTextBox, _passwordTextBox);
+
+            if (_loginButton != null)
             {
-                passwordTextBox.Text = string.Empty;
+                AcceptButton = _loginButton;
             }
 
-            ResetValidationStates(phoneTextBox, passwordTextBox);
-
-            if (loginButton != null)
+            if (_phoneTextBox != null)
             {
-                AcceptButton = loginButton;
+                ActiveControl = _phoneTextBox;
+                _phoneTextBox.Focus();
             }
 
-            if (phoneTextBox != null)
-            {
-                ActiveControl = phoneTextBox;
-                phoneTextBox.Focus();
-            }
+            ReflowLayout();
         }
 
         private void InitializeComponent()
         {
             SuspendLayout();
-            // 
+            //
             // LoginContentForm
-            // 
+            //
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1024, 576);
             Name = "LoginContentForm";
-            Text = "\u0110\u0103ng nh\u1EADp";
+            Text = "Đăng nhập";
             ResumeLayout(false);
         }
     }

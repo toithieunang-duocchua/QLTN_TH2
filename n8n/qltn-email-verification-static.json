@@ -1,0 +1,165 @@
+{
+  "name": "QLTN - Email Verification (StaticData)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "verify-email",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "request-webhook",
+      "name": "Request Verification Code",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [200, 180],
+      "webhookId": "verify-email"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst body = (item.json.body ?? item.json) || {};\nconst emailRaw = body.email ?? '';\nconst email = String(emailRaw).trim().toLowerCase();\n\nif (!email) {\n  throw new Error('Thiếu email trong request.');\n}\n\nconst now = Date.now();\nconst lifetimeMs = 5 * 60 * 1000; // 5 phút\nconst expiresAt = new Date(now + lifetimeMs);\n\n// Tạo mã 6 số ngẫu nhiên\nconst code = Math.floor(100000 + Math.random() * 900000)\n  .toString()\n  .padStart(6, '0');\n\n// Lưu vào staticData\nconst staticData = $getWorkflowStaticData('global');\nstaticData.codes ??= {};\nstaticData.codes[email] = {\n  code,\n  expiresAt: expiresAt.getTime(),\n  createdAt: now\n};\n\nreturn [\n  {\n    json: {\n      email,\n      verificationCode: code,\n      expiresAtUtc: expiresAt.toISOString(),\n      expiresInSeconds: Math.floor(lifetimeMs / 1000)\n    }\n  }\n];"
+      },
+      "id": "generate-code",
+      "name": "Generate Verification Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 180]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Mã xác minh QLTN",
+        "message": "={{ \"Mã xác minh của bạn là: \" + $json.verificationCode + \". Mã có hiệu lực trong 5 phút.\" }}",
+        "options": {}
+      },
+      "id": "send-email",
+      "name": "Send Code via Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [680, 180],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Verification code sent\",\n  \"code\": $json.verificationCode,\n  \"expiresAtUtc\": $json.expiresAtUtc,\n  \"expiresInSeconds\": $json.expiresInSeconds\n}",
+        "options": {}
+      },
+      "id": "respond-request",
+      "name": "Respond Verification Request",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [920, 180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "verify-code",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "verify-webhook",
+      "name": "Verify Code Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [200, 420],
+      "webhookId": "verify-code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst body = (item.json.body ?? item.json) || {};\nconst emailRaw = body.email ?? '';\nconst codeRaw = body.code ?? '';\nconst email = String(emailRaw).trim().toLowerCase();\nconst code = String(codeRaw).trim();\n\nconst staticData = $getWorkflowStaticData('global');\nstaticData.codes ??= {};\nconst ticket = staticData.codes[email];\nconst now = Date.now();\n\nif (!email || !code) {\n  return [{ json: { status: 'incorrect', message: 'Email hoặc mã xác minh không hợp lệ.' } }];\n}\n\nif (!ticket) {\n  return [{ json: { status: 'not_requested', message: 'Không tìm thấy yêu cầu xác minh. Vui lòng gửi lại mã.' } }];\n}\n\nif (ticket.expiresAt <= now) {\n  delete staticData.codes[email];\n  return [{ json: { status: 'expired', message: 'Mã xác minh đã hết hạn. Vui lòng yêu cầu mã mới.' } }];\n}\n\nif (ticket.code !== code) {\n  return [{ json: { status: 'incorrect', message: 'Mã xác minh không chính xác.' } }];\n}\n\nconst remainingSeconds = Math.max(0, Math.floor((ticket.expiresAt - now) / 1000));\ndelete staticData.codes[email];\n\nreturn [{ json: { status: 'success', message: 'Code validated', remainingSeconds } }];"
+      },
+      "id": "check-code",
+      "name": "Evaluate Verification Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 420]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-verify",
+      "name": "Respond Verification Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [680, 420]
+    }
+  ],
+  "connections": {
+    "Request Verification Code": {
+      "main": [
+        [
+          {
+            "node": "Generate Verification Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Verification Code": {
+      "main": [
+        [
+          {
+            "node": "Send Code via Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Code via Gmail": {
+      "main": [
+        [
+          {
+            "node": "Respond Verification Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Code Webhook": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Verification Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Verification Code": {
+      "main": [
+        [
+          {
+            "node": "Respond Verification Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 2,
+  "updatedAt": "2025-01-15T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -10,3 +10,15 @@ C:\Users\Terrykote\Desktop\QLTN\obj\Debug\QLTN.pdb
 C:\Users\Terrykote\Desktop\QLTN\obj\Debug\QLTN.Forms.FormRegister.resources
 C:\Users\Terrykote\Desktop\QLTN\bin\Debug\Assets\main_background.png
 C:\Users\Terrykote\Desktop\QLTN\obj\Debug\QLTN.exe.config
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\obj\Debug\QLTN.csproj.AssemblyReference.cache
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\obj\Debug\QLTN.exe.config
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\obj\Debug\QLTN.Forms.FormRegister.resources
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\obj\Debug\QLTN.Properties.Resources.resources
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\obj\Debug\QLTN.csproj.GenerateResource.cache
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\obj\Debug\QLTN.csproj.CoreCompileInputs.cache
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\obj\Debug\QLTN.exe
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\obj\Debug\QLTN.pdb
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\bin\Debug\Assets\main_background.png
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\bin\Debug\QLTN.exe.config
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\bin\Debug\QLTN.exe
+C:\Users\Terrykote\Desktop\CNPM\QLTN_TH2\bin\Debug\QLTN.pdb

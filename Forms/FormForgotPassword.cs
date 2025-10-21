@@ -34,12 +34,12 @@ namespace QLTN.Forms
 
         private void SetupControls()
         {
-            Panel mainPanel = CreateSurfacePanel(new Size(420, 420));
+            Panel mainPanel = CreateSurfacePanel(new Size(420, 380));
             mainPanel.Anchor = AnchorStyles.None;
             Controls.Add(mainPanel);
             AttachCentering(mainPanel);
 
-            int currentY = 40;
+            int currentY = 32;
 
             mainPanel.Controls.Add(new Label
             {
@@ -58,13 +58,13 @@ namespace QLTN.Forms
                 Text = "Nh\u1EADp email c\u1EE7a b\u1EA1n \u0111\u1EC3 nh\u1EADn m\u00E3 x\u00E1c minh.",
                 Font = new Font("Segoe UI", 11),
                 ForeColor = SecondaryTextColor,
-                Size = new Size(ContentWidth, 40),
+                Size = new Size(ContentWidth, 48),
                 Location = new Point(CenterContentX(mainPanel.Width, ContentWidth), currentY),
                 TextAlign = ContentAlignment.MiddleCenter
             };
             mainPanel.Controls.Add(instructionsLabel);
 
-            currentY += 60;
+            currentY = instructionsLabel.Bottom + 24;
 
             Label emailLabel = CreateCenteredLabel("Email c\u1EE7a b\u1EA1n", mainPanel.Width, currentY - 20);
             mainPanel.Controls.Add(emailLabel);
@@ -80,7 +80,7 @@ namespace QLTN.Forms
             emailTextBox.TextChanged += (s, e) => SetValidationState(emailTextBox, ValidationState.Neutral);
             mainPanel.Controls.Add(emailTextBox);
 
-            currentY += 60;
+            currentY = emailTextBox.Bottom + 24;
 
             Button nextButton = new Button
             {
@@ -96,18 +96,18 @@ namespace QLTN.Forms
             mainPanel.Controls.Add(nextButton);
             AcceptButton = nextButton;
 
-            currentY += 55;
+            currentY = nextButton.Bottom + 24;
 
             LinkLabel backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", currentY, mainPanel.Width);
             backLink.Click += (s, e) => ShowNextForm<LoginContentForm>();
             mainPanel.Controls.Add(backLink);
 
-            currentY += 35;
+            currentY = backLink.Bottom + 20;
 
             Label errorLabel = new Label
             {
                 Name = "lblError",
-                Size = new Size(ContentWidth, 48),
+                Size = new Size(ContentWidth, 44),
                 Location = new Point(CenterContentX(mainPanel.Width, ContentWidth), currentY),
                 Font = new Font("Segoe UI", 10),
                 ForeColor = Color.FromArgb(255, 107, 107),

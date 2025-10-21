@@ -2,7 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\Database",
-    "\\Forms"
+    "\\Forms",
+    "\\Models",
+    "\\obj",
+    "\\Properties",
+    "\\Services"
   ],
   "SelectedNode": "\\QLTN.sln",
   "PreviewInSolutionExplorer": false

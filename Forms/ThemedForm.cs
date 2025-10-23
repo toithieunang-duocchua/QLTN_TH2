@@ -63,7 +63,7 @@ namespace QLTN.Forms
                 return;
             }
 
-            e.Graphics.Clear(Color.Black);
+            e.Graphics.Clear(Color.White);
         }
 
         protected override void WndProc(ref Message m)
@@ -365,5 +365,60 @@ namespace QLTN.Forms
             Control[] matches = Controls.Find(controlName, true);
             return matches.Length > 0 ? matches[0] as TControl : null;
         }
+
+        public static void ApplyRoundedCorners(Control control, int radius, Corners corners)
+        {
+            if (control.Width == 0 || control.Height == 0) return;
+
+            GraphicsPath path = new GraphicsPath();
+
+            int w = control.Width;
+            int h = control.Height;
+
+            bool topLeft = corners.HasFlag(Corners.TopLeft);
+            bool topRight = corners.HasFlag(Corners.TopRight);
+            bool bottomLeft = corners.HasFlag(Corners.BottomLeft);
+            bool bottomRight = corners.HasFlag(Corners.BottomRight);
+
+            // B?t ??u t? góc trên trái
+            if (topLeft)
+                path.AddArc(0, 0, radius, radius, 180, 90);
+            else
+                path.AddLine(0, 0, radius, 0);
+
+            // Trên ph?i
+            if (topRight)
+                path.AddArc(w - radius, 0, radius, radius, 270, 90);
+            else
+                path.AddLine(w, 0, w, radius);
+
+            // D??i ph?i
+            if (bottomRight)
+                path.AddArc(w - radius, h - radius, radius, radius, 0, 90);
+            else
+                path.AddLine(w, h, w - radius, h);
+
+            // D??i trái
+            if (bottomLeft)
+                path.AddArc(0, h - radius, radius, radius, 90, 90);
+            else
+                path.AddLine(0, h, 0, h - radius);
+
+            path.CloseAllFigures();
+            control.Region = new Region(path);
+        }
+
+
+        [System.Flags]
+        public enum Corners
+        {
+            None = 0,
+            TopLeft = 1,
+            TopRight = 2,
+            BottomRight = 4,
+            BottomLeft = 8,
+            All = TopLeft | TopRight | BottomRight | BottomLeft
+        }
+
     }
 }

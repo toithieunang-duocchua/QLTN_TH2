@@ -1,8 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using QLTN.Forms;
+using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
-using QLTN.Forms;
+using System.Windows.Forms.Integration;
 
 namespace QLTN.Forms
 {
@@ -16,7 +17,21 @@ namespace QLTN.Forms
         public FormMainSystem()
         {
             InitializeComponent();
-            SetupForm();
+            SetupForm();     
+            LoadWpfControl(); 
+        }
+
+        private void LoadWpfControl()
+        {
+            // Tạo ElementHost chứa WPF UserControl
+            ElementHost host = new ElementHost
+            {
+                Dock = DockStyle.Fill,
+                Child = new FormTenantManagerment()
+            };
+
+            mainPanel.Controls.Clear();
+            this.Controls.Add(host);
         }
 
         private void SetupForm()
@@ -61,7 +76,7 @@ namespace QLTN.Forms
             AuthNavigationManager.Initialize(mainPanel);
 
             AddSidebarButton("\uf52b", "Nhà && Phòng", (s, e) => ShowMessage("Hợp đồng"));
-            AddSidebarButton("\uf0c0", "Người thuê", (s, e) => ShowMessage("Hợp đồng"));
+            AddSidebarButton("\uf0c0", "Người thuê", (s, e) => AuthNavigationManager.Navigate<Form1>());
             AddSidebarButton("\uf15c", "Hợp đồng", (s, e) => ShowMessage("Hợp đồng"));
             AddSidebarButton("\uf555", "Tài chính", (s, e) => ShowMessage("Tài chính"));
             AddSidebarButton("\uf53a", "Thanh Toán", (s, e) => ShowMessage("Thanh Toán"));

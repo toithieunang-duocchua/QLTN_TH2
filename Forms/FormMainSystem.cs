@@ -1,11 +1,17 @@
+﻿using System;
+using System.IO;
 using System.Drawing;
 using System.Windows.Forms;
+using QLTN.Forms;
 
 namespace QLTN.Forms
 {
     public partial class FormMainSystem : ThemedForm
     {
         private static readonly Size TargetFormSize = new Size(1024, 576);
+        string path = Path.Combine(Application.StartupPath, "Assets", "logo.png");
+        private Panel sidebar;
+        private Panel mainPanel;
 
         public FormMainSystem()
         {
@@ -22,31 +28,121 @@ namespace QLTN.Forms
             FormBorderStyle = FormBorderStyle.Sizable;
             MaximizeBox = true;
 
-            Panel surface = CreateSurfacePanel(new Size(620, 360));
-            surface.Anchor = AnchorStyles.None;
-            Controls.Add(surface);
-            AttachCentering(surface);
 
-            TableLayoutPanel layout = new TableLayoutPanel
+            sidebar = new Panel
             {
-                Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 1,
-                Padding = new Padding(32),
-                BackColor = Color.Transparent
+                Dock = DockStyle.Left,
+                Width = 250,
+                BackColor = Color.White
             };
-            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            surface.Controls.Add(layout);
 
-            Label placeholderLabel = new Label
+
+            PictureBox logo = new PictureBox
+            {
+                Image = Image.FromFile(path),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Dock = DockStyle.Top,
+                Height = 100
+            };
+            sidebar.Controls.Add(logo);
+
+            mainPanel = new Panel
             {
                 Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter,
-                ForeColor = Color.White,
+                BackColor = Color.White,
+                AutoScroll = true,
+                Padding = new Padding(0, 0, 0, 10)
+            };
+
+
+            Controls.Add(mainPanel);
+            Controls.Add(sidebar);
+
+            AuthNavigationManager.Initialize(mainPanel);
+
+            AddSidebarButton("\uf52b", "Nhà && Phòng", (s, e) => ShowMessage("Hợp đồng"));
+            AddSidebarButton("\uf0c0", "Người thuê", (s, e) => ShowMessage("Hợp đồng"));
+            AddSidebarButton("\uf15c", "Hợp đồng", (s, e) => ShowMessage("Hợp đồng"));
+            AddSidebarButton("\uf555", "Tài chính", (s, e) => ShowMessage("Tài chính"));
+            AddSidebarButton("\uf53a", "Thanh Toán", (s, e) => ShowMessage("Thanh Toán"));
+            AddSidebarButton("\uf201", "Báo cáo && Thống kê", (s, e) => ShowMessage("Báo cáo & Thống kê"));
+            AddSidebarButton("\uf071", "Quản lý sự cố", (s, e) => ShowMessage("Quản lý sự cố"));
+            AddSidebarButton("\uf007", "Accounts", (s, e) => Application.Exit());
+
+        }
+
+        private Panel AddSidebarButton(string icon, string txt, EventHandler onClick)
+        {
+            Panel itemPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 45,
+                BackColor = Color.White,
+                Cursor = Cursors.Hand
+            };
+
+            // Icon
+            Label lblIcon = new Label
+            {
+                Text = icon,
+                Font = new Font("Font Awesome 7 Free Solid", 16, FontStyle.Regular),
+                Dock = DockStyle.Left,
+                Width = 45,
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+
+            // Text
+            Label lblText = new Label
+            {
+                Text = txt,
+                Font = new Font("Segoe UI", 13, FontStyle.Bold),
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(5, 0, 0, 0)
+            };
+
+            // Hover effect
+            itemPanel.MouseEnter += (s, e) =>
+            {
+                itemPanel.BackColor = Color.FromArgb(254, 140, 27);
+                lblText.Font = new Font(lblText.Font, FontStyle.Bold);
+            };
+
+            itemPanel.MouseLeave += (s, e) =>
+            {
+                itemPanel.BackColor = Color.White;
+                lblText.Font = new Font(lblText.Font, FontStyle.Regular);
+            };
+
+            // Click event
+            itemPanel.Click += onClick;
+            lblIcon.Click += onClick;
+            lblText.Click += onClick;
+
+            itemPanel.Controls.Add(lblText);
+            itemPanel.Controls.Add(lblIcon);
+            sidebar.Controls.Add(itemPanel);
+            sidebar.Controls.SetChildIndex(itemPanel, 0);
+
+            return itemPanel;
+        }
+
+        //Test0
+        private void ShowMessage(string msg)
+        {
+            if ((mainPanel) == null) return;
+
+            mainPanel.Controls.Clear();
+
+            Label lbl = new Label
+            {
+                Dock = DockStyle.Fill,
+                Text = msg,
                 Font = new Font("Segoe UI", 20, FontStyle.Bold),
-                Text = "Trang ch\u00EDnh \u0111ang \u0111\u01B0\u1EE3c x\u00E2y d\u1EF1ng.\nVui l\u00F2ng quay l\u1EA1i menu ch\u00EDnh khi c\u1EA7n."
+                TextAlign = ContentAlignment.MiddleCenter
             };
-            layout.Controls.Add(placeholderLabel, 0, 0);
+
+            mainPanel.Controls.Add(lbl);
         }
 
         private void InitializeComponent()

@@ -76,7 +76,7 @@ namespace QLTN.Forms
             AuthNavigationManager.Initialize(mainPanel);
 
             AddSidebarButton("\uf52b", "Nhà && Phòng", (s, e) => ShowMessage("Hợp đồng"));
-            AddSidebarButton("\uf0c0", "Người thuê", (s, e) => AuthNavigationManager.Navigate<Form1>());
+            AddSidebarButton("\uf0c0", "Người thuê", (s, e) => AuthNavigationManager.LoadWpfControl<FormTenantManagerment>());
             AddSidebarButton("\uf15c", "Hợp đồng", (s, e) => ShowMessage("Hợp đồng"));
             AddSidebarButton("\uf555", "Tài chính", (s, e) => ShowMessage("Tài chính"));
             AddSidebarButton("\uf53a", "Thanh Toán", (s, e) => ShowMessage("Thanh Toán"));

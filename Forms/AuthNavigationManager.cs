@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Windows.Forms.Integration; // For ElementHost
 using QLTN.Controls;
 
 namespace QLTN.Forms
@@ -11,14 +12,14 @@ namespace QLTN.Forms
     /// </summary>
     internal static class AuthNavigationManager
     {
-        private static Panel hostPanel;
+        private static System.Windows.Forms.Panel hostPanel; // explicitly WinForms Panel
         private static TransitionHostPanel transitionPanel;
         private static Form currentForm;
         private static readonly Dictionary<Type, Form> FormCache = new Dictionary<Type, Form>();
 
         public static bool HasHost => hostPanel != null && !hostPanel.IsDisposed;
 
-        public static void Initialize(Panel panel)
+        public static void Initialize(System.Windows.Forms.Panel panel)
         {
             hostPanel = panel ?? throw new ArgumentNullException(nameof(panel));
             transitionPanel = panel as TransitionHostPanel;
@@ -36,9 +37,7 @@ namespace QLTN.Forms
         public static void Navigate(Form nextForm, Form previousForm = null)
         {
             if (nextForm == null)
-            {
                 throw new ArgumentNullException(nameof(nextForm));
-            }
 
             PrepareFormForDisplay(nextForm);
 
@@ -47,9 +46,7 @@ namespace QLTN.Forms
                 if (previousForm != null)
                 {
                     if (previousForm.WindowState == FormWindowState.Maximized)
-                    {
                         nextForm.WindowState = FormWindowState.Maximized;
-                    }
 
                     nextForm.Show(previousForm);
                     previousForm.Hide();
@@ -69,9 +66,7 @@ namespace QLTN.Forms
             {
                 transitionPanel.TransitionTo(nextForm);
                 if (formToRemove != null && !ReferenceEquals(formToRemove, nextForm))
-                {
                     formToRemove.Hide();
-                }
 
                 currentForm = nextForm;
                 return;
@@ -103,9 +98,7 @@ namespace QLTN.Forms
             if (FormCache.TryGetValue(key, out Form cachedForm))
             {
                 if (cachedForm != null && !cachedForm.IsDisposed)
-                {
                     return (TForm)cachedForm;
-                }
 
                 FormCache.Remove(key);
             }
@@ -121,9 +114,7 @@ namespace QLTN.Forms
             {
                 Form form = entry.Value;
                 if (form != null && !form.IsDisposed)
-                {
                     form.Dispose();
-                }
             }
 
             FormCache.Clear();
@@ -132,9 +123,22 @@ namespace QLTN.Forms
         private static void PrepareFormForDisplay(Form form)
         {
             if (form is IAuthView authView)
-            {
                 authView.PrepareForDisplay();
-            }
+        }
+
+        public static void LoadWpfControl<TControl>() where TControl : System.Windows.Controls.UserControl, new()
+        {
+            if (hostPanel == null || hostPanel.IsDisposed)
+                throw new InvalidOperationException("Host panel is not initialized.");
+
+            ElementHost host = new ElementHost
+            {
+                Dock = DockStyle.Fill,
+                Child = new TControl() // fully-qualified WPF UserControl
+            };
+
+            hostPanel.Controls.Clear();
+            hostPanel.Controls.Add(host);
         }
     }
 }

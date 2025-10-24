@@ -11,6 +11,8 @@ namespace QLTN.Forms
     {
         private static readonly Size TargetFormSize = new Size(1024, 576);
         string path = Path.Combine(Application.StartupPath, "Assets", "logo.png");
+        
+
         private Panel sidebar;
         private Panel mainPanel;
 
@@ -32,6 +34,16 @@ namespace QLTN.Forms
 
             mainPanel.Controls.Clear();
             this.Controls.Add(host);
+        }
+
+        public void LoadFormIntoMainPanel(Form form)
+        {
+            // Clear existing controls
+            mainPanel.Controls.Clear();
+            
+            // Add the form to mainPanel
+            mainPanel.Controls.Add(form);
+            form.Show();
         }
 
         private void SetupForm()
@@ -75,7 +87,7 @@ namespace QLTN.Forms
 
             AuthNavigationManager.Initialize(mainPanel);
 
-            AddSidebarButton("\uf52b", "Nhà && Phòng", (s, e) => ShowMessage("Hợp đồng"));
+            AddSidebarButton("\uf52b", "Nhà && Phòng", (s, e) => AuthNavigationManager.LoadWinForm<FormHouseManagement>());
             AddSidebarButton("\uf0c0", "Người thuê", (s, e) => AuthNavigationManager.LoadWpfControl<FormTenantManagerment>());
             AddSidebarButton("\uf15c", "Hợp đồng", (s, e) => ShowMessage("Hợp đồng"));
             AddSidebarButton("\uf555", "Tài chính", (s, e) => ShowMessage("Tài chính"));

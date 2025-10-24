@@ -140,5 +140,27 @@ namespace QLTN.Forms
             hostPanel.Controls.Clear();
             hostPanel.Controls.Add(host);
         }
+
+        public static void LoadWinForm<TForm>() where TForm : Form, new()
+        {
+            if (hostPanel == null || hostPanel.IsDisposed)
+                throw new InvalidOperationException("Host panel is not initialized.");
+
+            // Xóa n?i dung c? trong panel
+            hostPanel.Controls.Clear();
+
+            // T?o instance form m?i
+            TForm form = new TForm();
+
+            // Thi?t l?p form ?? có th? nhúng vào panel
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
+
+            // Thêm form vào panel và hi?n th?
+            hostPanel.Controls.Add(form);
+            form.Show();
+        }
+
     }
 }

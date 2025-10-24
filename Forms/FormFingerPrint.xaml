@@ -1,11 +1,11 @@
-﻿<UserControl x:Class="QLTN.Forms.FormTenantManagerment"
+﻿<UserControl x:Class="QLTN.Forms.FormFingerPrint"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:QLTN.Forms"
              mc:Ignorable="d" 
-             Width="1000" Height="700">
+             Width="1000" Height="600">
     <UserControl.Resources>
         <!--  Bo góc cho TextBox -->
         <Style TargetType="TextBox">
@@ -111,82 +111,89 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
+        <Style x:Key="AvatarStyle" TargetType="Border">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Background" Value="#5B63D0"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
     </UserControl.Resources>
 
-    <Grid Background="#5B63D0">
+    <Grid Background="White">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" MinHeight="80"/>
             <!-- Row 0: Header -->
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" MinHeight="70"/>
             <!-- Row 1: Search/Filter -->
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*" MinHeight="200"/>
             <!-- Row 2: DataGrid -->
         </Grid.RowDefinitions>
 
-        <!-- Header Section -->
+        <!-- Header with gradient -->
         <Border Grid.Row="0"
-                Background="White"
-                Margin="20,15,20,10"
-                CornerRadius="12"
-                Padding="20">
+                Background="#5B63D0"
+                Padding="30,20">
             <StackPanel VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                    <TextBlock Text="👥 " FontSize="20" Margin="0,0,8,0"/>
-                    <TextBlock Text="Quản lý Người thuê"
-                               FontSize="18"
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="👤 " FontSize="18"/>
+                    <TextBlock Text="Quản lý Người thuê &amp; Vận hành"
+                               FontSize="20"
                                FontWeight="Bold"
-                               Foreground="#1F2937"/>
+                               Foreground="White"/>
                 </StackPanel>
-                <TextBlock Text="Quản lý thông tin người thuê và vân tay"
+                <TextBlock Text="Số hộ thông tin người thuê và quản lý vận hành"
                            FontSize="13"
-                           Foreground="#6B7280"
-                           Margin="28,2,0,0"/>
+                           Foreground="#E8EAFF"
+                           Margin="0,6,0,0"/>
             </StackPanel>
         </Border>
 
-        <!-- Search/Filter Bar -->
+        <!-- Search/Filter Controls -->
         <Border Grid.Row="1"
                 Background="White"
-                Margin="20,0,20,10"
-                CornerRadius="12"
-                Padding="20">
+                Padding="30,15"
+                BorderBrush="#E5E7EB"
+                BorderThickness="0,1,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Search Box -->
-                <Grid Grid.Column="0" Margin="0,0,20,0">
+                <Grid Grid.Column="0" Margin="0,0,15,0">
                     <TextBox x:Name="SearchBox"
-                             Height="44"
+                             Height="40"
                              FontSize="14"
-                             Padding="14,12,40,12"
-                             BorderBrush="#E5E7EB"
+                             Padding="12,10,40,10"
+                             BorderBrush="#ddd"
                              BorderThickness="1"
                              Foreground="#333"
                              Background="White"
                              VerticalAlignment="Center"
-                             TextChanged="SearchBox_TextChanged_1"/>
+                             Margin="0,0,193,0"/>
 
                     <TextBlock x:Name="Placeholder"
-                               Text="🔍 Tìm kiếm theo tên, SDT,..."
-                               Foreground="#9CA3AF"
+                               Text="Tìm kiếm theo tên, SDT,..."
+                               Foreground="#999"
                                FontSize="14"
-                               Padding="14,0,0,0"
+                               Padding="12,0,0,0"
                                IsHitTestVisible="False"
                                Visibility="Visible"
                                VerticalAlignment="Center"/>
                 </Grid>
 
                 <!-- Room Filter -->
-                <ComboBox Grid.Column="1"
-                          Width="140"
-                          Height="44"
+                <ComboBox
+                          Height="40"
                           SelectedIndex="0"
                           VerticalAlignment="Center"
-                          Margin="0,0,20,0">
+                          Margin="555,0,15,0" Grid.ColumnSpan="2">
                     <ComboBoxItem Content="Tất cả phòng"/>
                     <ComboBoxItem Content="101"/>
                     <ComboBoxItem Content="102"/>
@@ -195,23 +202,21 @@
 
                 <!-- Add Tenant Button -->
                 <Button Grid.Column="2"
-                        Content="Thêm người thuê mới"
-                        Width="160"
-                        Height="44"
+                        Content="➕ Thêm người thuê mới"
+                        Width="Auto"
+                        Height="40"
                         Background="#5B63D0"
                         Foreground="White"
                         FontSize="14"
-                        VerticalAlignment="Center"/>
+                        VerticalAlignment="Center"
+                        Padding="15,10"/>
             </Grid>
         </Border>
 
         <!-- DataGrid Container -->
         <Border Grid.Row="2"
-                Background="White"
-                Margin="20,0,20,20"
-                CornerRadius="12"
-                Padding="0"
-                ClipToBounds="True">
+                Background="#F9FAFB"
+                Padding="20">
             <DataGrid x:Name="TenantsDataGrid"
                       SelectionMode="Single"
                       SelectionUnit="FullRow"
@@ -220,9 +225,8 @@
                       CanUserAddRows="False"
                       CanUserDeleteRows="False"
                       CanUserResizeColumns="False"
-                      CanUserReorderColumns="False"
                       IsReadOnly="True"
-                      RowHeight="55"
+                      RowHeight="60"
                       GridLinesVisibility="None"
                       Background="White"
                       BorderThickness="0"
@@ -233,31 +237,31 @@
                     <!-- Header Style -->
                     <Style TargetType="DataGridColumnHeader">
                         <Setter Property="Background" Value="White"/>
-                        <Setter Property="Foreground" Value="#6B7280"/>
+                        <Setter Property="Foreground" Value="#666"/>
                         <Setter Property="FontWeight" Value="SemiBold"/>
                         <Setter Property="FontSize" Value="12"/>
                         <Setter Property="BorderThickness" Value="0,0,0,1"/>
                         <Setter Property="BorderBrush" Value="#E5E7EB"/>
                         <Setter Property="Padding" Value="15,12"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
                         <Setter Property="VerticalContentAlignment" Value="Center"/>
                     </Style>
 
                     <!-- Row Style -->
                     <Style TargetType="DataGridRow">
                         <Setter Property="Background" Value="White"/>
-                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Margin" Value="0,0,0,0"/>
                         <Setter Property="Padding" Value="0"/>
-                        <Setter Property="BorderBrush" Value="#F3F4F6"/>
+                        <Setter Property="BorderBrush" Value="#E5E7EB"/>
                         <Setter Property="BorderThickness" Value="0,0,0,1"/>
 
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F9FAFB"/>
+                                <Setter Property="Background" Value="#F3F4FF"/>
                             </Trigger>
 
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#F3F4F6"/>
+                                <Setter Property="Background" Value="#E8EAFF"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -269,7 +273,7 @@
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="DataGridCell">
-                                    <Border Padding="12,0"
+                                    <Border Padding="10,0"
                                             Background="{TemplateBinding Background}"
                                             BorderThickness="{TemplateBinding BorderThickness}">
                                         <ContentPresenter VerticalAlignment="Center"/>
@@ -284,13 +288,14 @@
                 <DataGrid.Columns>
 
                     <!-- Column: NGƯỜI THUÊ with Avatar -->
-                    <DataGridTemplateColumn Header="NGƯỜI THUÊ" Width="1.3*">
+                    <DataGridTemplateColumn Header="NGƯỜI THUÊ" Width="1.2*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal"
                                             VerticalAlignment="Center"
-                                            HorizontalAlignment="Left">
-                                    <Border Width="40" Height="40" CornerRadius="20" 
+                                            HorizontalAlignment="Left"
+                                            Margin="10,0,0,0">
+                                    <Border Width="36" Height="36" CornerRadius="18" 
                                             Background="#5B63D0" 
                                             Margin="0,0,12,0">
                                         <TextBlock Text="{Binding Avatar}"
@@ -313,12 +318,14 @@
                     <!-- Column: PHÒNG -->
                     <DataGridTextColumn Header="PHÒNG"
                                         Binding="{Binding Phong}"
-                                        Width="0.8*"/>
+                                        Width="0.8*"
+                                        ElementStyle="{StaticResource CenteredText}"/>
 
                     <!-- Column: SỐ ĐIỆN THOẠI -->
                     <DataGridTextColumn Header="SỐ ĐIỆN THOẠI"
                                         Binding="{Binding SDT}"
-                                        Width="1.2*"/>
+                                        Width="1*"
+                                        ElementStyle="{StaticResource CenteredText}"/>
 
                     <!-- Column: SỐ NGƯỜI Ở -->
                     <DataGridTextColumn Header="SỐ NGƯỜI Ở"
@@ -327,36 +334,39 @@
                                         ElementStyle="{StaticResource CenteredText}"/>
 
                     <!-- Column: TRẠNG THÁI VÂN TAY -->
-                    <DataGridTemplateColumn Header="TRẠNG THÁI VÂN TAY" Width="1.1*">
+                    <DataGridTemplateColumn Header="TRẠNG THÁI VÂN TAY" Width="1.2*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Border CornerRadius="10"
-                                        Padding="10,5"
+                                <Border CornerRadius="12"
+                                        Padding="12,6"
                                         Background="{Binding MauTrangThai}"
-                                        HorizontalAlignment="Left"
-                                        Width="Auto">
+                                        HorizontalAlignment="Center"
+                                        MaxWidth="150">
                                     <TextBlock Text="{Binding TrangThai}"
                                                Foreground="White"
                                                FontWeight="SemiBold"
-                                               FontSize="11"/>
+                                               HorizontalAlignment="Center"
+                                               FontSize="12"/>
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
                     <!-- Column: HỢP ĐỒNG -->
-                    <DataGridTemplateColumn Header="HỢP ĐỒNG" Width="1.1*">
+                    <DataGridTemplateColumn Header="HỢP ĐỒNG" Width="1.2*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Border CornerRadius="10"
+                                <Border CornerRadius="12"
                                         Background="{Binding MauHopDong}"
-                                        HorizontalAlignment="Left"
-                                        Padding="10,5"
-                                        Width="Auto">
+                                        HorizontalAlignment="Center"
+                                        Padding="12,6"
+                                        MaxWidth="150">
                                     <TextBlock Text="{Binding HopDong}"
                                                Foreground="{Binding MauChuHopDong}"
                                                FontWeight="SemiBold"
-                                               FontSize="11"/>
+                                               FontSize="12"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

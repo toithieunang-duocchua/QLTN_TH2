@@ -97,6 +97,5 @@ namespace QLTN.Forms
             public Brush MauChuHopDong { get; set; }
         }
 
-
     }
 }

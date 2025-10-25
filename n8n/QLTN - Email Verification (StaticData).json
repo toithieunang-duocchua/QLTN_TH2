@@ -8,22 +8,28 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "request-webhook",
+      "id": "f781ff77-912b-4bd2-9576-8c65a4367cf1",
       "name": "Request Verification Code",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [200, 180],
+      "position": [
+        528,
+        -144
+      ],
       "webhookId": "verify-email"
     },
     {
       "parameters": {
         "jsCode": "const item = $input.first();\nconst body = (item.json.body ?? item.json) || {};\nconst emailRaw = body.email ?? '';\nconst email = String(emailRaw).trim().toLowerCase();\n\nif (!email) {\n  throw new Error('Thiếu email trong request.');\n}\n\nconst now = Date.now();\nconst lifetimeMs = 5 * 60 * 1000; // 5 phút\nconst expiresAt = new Date(now + lifetimeMs);\n\n// Tạo mã 6 số ngẫu nhiên\nconst code = Math.floor(100000 + Math.random() * 900000)\n  .toString()\n  .padStart(6, '0');\n\n// Lưu vào staticData\nconst staticData = $getWorkflowStaticData('global');\nstaticData.codes ??= {};\nstaticData.codes[email] = {\n  code,\n  expiresAt: expiresAt.getTime(),\n  createdAt: now\n};\n\nreturn [\n  {\n    json: {\n      email,\n      verificationCode: code,\n      expiresAtUtc: expiresAt.toISOString(),\n      expiresInSeconds: Math.floor(lifetimeMs / 1000)\n    }\n  }\n];"
       },
-      "id": "generate-code",
+      "id": "a14205dc-6152-41d7-a40e-6d60165bbda9",
       "name": "Generate Verification Code",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 180]
+      "position": [
+        768,
+        -144
+      ]
     },
     {
       "parameters": {
@@ -32,15 +38,19 @@
         "message": "={{ \"Mã xác minh của bạn là: \" + $json.verificationCode + \". Mã có hiệu lực trong 5 phút.\" }}",
         "options": {}
       },
-      "id": "send-email",
+      "id": "27cbf10e-5950-43db-a444-19ffe972100b",
       "name": "Send Code via Gmail",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [680, 180],
+      "position": [
+        1008,
+        -144
+      ],
+      "webhookId": "4cbecac6-8e96-414d-9959-49fcddc69609",
       "credentials": {
         "gmailOAuth2": {
-          "id": "YOUR_GMAIL_CREDENTIAL_ID",
-          "name": "Gmail account"
+          "id": "TXcndUnBg8U7P0Te",
+          "name": "Gmail account 2"
         }
       }
     },
@@ -50,11 +60,14 @@
         "responseBody": "={\n  \"success\": true,\n  \"message\": \"Verification code sent\",\n  \"code\": $json.verificationCode,\n  \"expiresAtUtc\": $json.expiresAtUtc,\n  \"expiresInSeconds\": $json.expiresInSeconds\n}",
         "options": {}
       },
-      "id": "respond-request",
+      "id": "6cbc3452-30bc-4bcd-94c2-9b432ffe0062",
       "name": "Respond Verification Request",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
-      "position": [920, 180]
+      "position": [
+        1248,
+        -144
+      ]
     },
     {
       "parameters": {
@@ -63,22 +76,28 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "verify-webhook",
+      "id": "26f494c3-bb22-413d-814d-0cdd7d968704",
       "name": "Verify Code Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [200, 420],
+      "position": [
+        528,
+        96
+      ],
       "webhookId": "verify-code"
     },
     {
       "parameters": {
         "jsCode": "const item = $input.first();\nconst body = (item.json.body ?? item.json) || {};\nconst emailRaw = body.email ?? '';\nconst codeRaw = body.code ?? '';\nconst email = String(emailRaw).trim().toLowerCase();\nconst code = String(codeRaw).trim();\n\nconst staticData = $getWorkflowStaticData('global');\nstaticData.codes ??= {};\nconst ticket = staticData.codes[email];\nconst now = Date.now();\n\nif (!email || !code) {\n  return [{ json: { status: 'incorrect', message: 'Email hoặc mã xác minh không hợp lệ.' } }];\n}\n\nif (!ticket) {\n  return [{ json: { status: 'not_requested', message: 'Không tìm thấy yêu cầu xác minh. Vui lòng gửi lại mã.' } }];\n}\n\nif (ticket.expiresAt <= now) {\n  delete staticData.codes[email];\n  return [{ json: { status: 'expired', message: 'Mã xác minh đã hết hạn. Vui lòng yêu cầu mã mới.' } }];\n}\n\nif (ticket.code !== code) {\n  return [{ json: { status: 'incorrect', message: 'Mã xác minh không chính xác.' } }];\n}\n\nconst remainingSeconds = Math.max(0, Math.floor((ticket.expiresAt - now) / 1000));\ndelete staticData.codes[email];\n\nreturn [{ json: { status: 'success', message: 'Code validated', remainingSeconds } }];"
       },
-      "id": "check-code",
+      "id": "738bbbd3-d6b4-42ee-9f72-b381af968b16",
       "name": "Evaluate Verification Code",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 420]
+      "position": [
+        768,
+        96
+      ]
     },
     {
       "parameters": {
@@ -86,13 +105,17 @@
         "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "respond-verify",
+      "id": "32ccbda1-14c5-4e68-8f85-aacb7e824a32",
       "name": "Respond Verification Result",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
-      "position": [680, 420]
+      "position": [
+        1008,
+        96
+      ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Request Verification Code": {
       "main": [
@@ -150,16 +173,15 @@
       ]
     }
   },
-  "pinData": {},
+  "active": true,
   "settings": {
-    "executionOrder": "v1",
-    "saveManualExecutions": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "errorWorkflow": ""
+    "executionOrder": "v1"
   },
-  "staticData": null,
-  "tags": [],
-  "triggerCount": 2,
-  "updatedAt": "2025-01-15T00:00:00.000Z",
-  "versionId": "1"
+  "versionId": "27c75d93-989a-46dd-870d-3ec0f4a8446e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "46660a1b6a103b6192a5c86e856ac0d72a8edb7f1fbe419f9784fcb7b055c98b"
+  },
+  "id": "v8flen1qM8hBmoda",
+  "tags": []
 }

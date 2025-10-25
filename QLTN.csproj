@@ -34,26 +34,45 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Guna.UI2, Version=2.0.4.7, Culture=neutral, PublicKeyToken=8b9d14aa5142e261, processorArchitecture=MSIL">
+      <HintPath>packages\Guna.UI2.WinForms.2.0.4.7\lib\net48\Guna.UI2.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Text.Encodings.Web, Version=5.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Text.Encodings.Web.5.0.1\lib\net461\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Numerics" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Google\GmailApiClient.cs" />
     <Compile Include="API\Google\GoogleOAuthClient.cs" />
     <Compile Include="API\N8n\N8nWorkflowClient.cs" />
+    <Compile Include="API\N8n\N8nVietQRClient.cs" />
+    <Compile Include="API\VietQR\VietQRApiClient.cs" />
     <Compile Include="Database\DatabaseConnection.cs" />
     <Compile Include="Controls\LargeRadioButton.cs">
       <SubType>Component</SubType>
@@ -78,7 +97,103 @@
     <Compile Include="Forms\FormMainSystem.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\FormListHouse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormAddHouse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormAddHouse.Designer.cs">
+      <DependentUpon>FormAddHouse.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormEditHouse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormEditHousePopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormEditHousePopup.Designer.cs">
+      <DependentUpon>FormEditHousePopup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormHouseManagement.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormHouseManagement.Designer.cs">
+      <DependentUpon>FormHouseManagement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormListRoom.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <!-- <Compile Include="Forms\FormAddRoom.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormAddRoom.Designer.cs">
+      <DependentUpon>FormAddRoom.cs</DependentUpon>
+    </Compile> -->
+    <Compile Include="Forms\FormAddTenant.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormAddTenant.Designer.cs">
+      <DependentUpon>FormAddTenant.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormRoom.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormRoom.Designer.cs">
+      <DependentUpon>FormRoom.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormTenant.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormTenant.Designer.cs">
+      <DependentUpon>FormTenant.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormInfRoom.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormInfRoom.Designer.cs">
+      <DependentUpon>FormInfRoom.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormRoomDetail.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainDashboardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainAccountForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainContractsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainFinanceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainIssueManagementForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainPaymentsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainReportsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainRoomsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainStatisticsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MainTenantsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\VietQRConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\ThemedForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ThemedForm.LayoutHelpers.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\FormRegister.cs">
@@ -97,12 +212,45 @@
     <Compile Include="Models\ResetPasswordRequest.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\VerificationRequest.cs" />
+    <Compile Include="Models\VietQRModels.cs" />
     <Compile Include="Services\EmailVerificationService.cs" />
+    <Compile Include="Services\AuditLogger.cs" />
+    <Compile Include="Services\ApplicationManager.cs" />
+    <Compile Include="Services\SessionManager.cs" />
     <Compile Include="Services\UserService.cs" />
+    <Compile Include="Services\PaymentService.cs" />
+    <Compile Include="Services\VietQRBankService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\EmailValidator.cs" />
+    <Compile Include="Utilities\InputSanitizer.cs" />
+    <Compile Include="Utilities\PasswordHasher.cs" />
     <EmbeddedResource Include="Forms\FormRegister.resx">
       <DependentUpon>FormRegister.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormAddHouse.resx">
+      <DependentUpon>FormAddHouse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormAddTenant.resx">
+      <DependentUpon>FormAddTenant.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormEditHousePopup.resx">
+      <DependentUpon>FormEditHousePopup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormHouseManagement.resx">
+      <DependentUpon>FormHouseManagement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormRoom.resx">
+      <DependentUpon>FormRoom.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormTenant.resx">
+      <DependentUpon>FormTenant.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormInfRoom.resx">
+      <DependentUpon>FormInfRoom.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormMainSystem.resx">
+      <DependentUpon>FormMainSystem.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -113,6 +261,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -128,6 +277,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\main_background.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

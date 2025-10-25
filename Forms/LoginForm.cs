@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 using QLTN.Controls;
 
@@ -21,7 +21,7 @@ namespace QLTN.Forms
 
         private void SetupShell()
         {
-            Text = "H\u1EC7 th\u1ED1ng QLTN";
+            Text = "Hệ thống QLTN";
             Size = TargetFormSize;
             MinimumSize = TargetFormSize;
             StartPosition = FormStartPosition.CenterScreen;
@@ -52,7 +52,7 @@ namespace QLTN.Forms
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1024, 576);
             Name = "LoginForm";
-            Text = "H\u1EC7 th\u1ED1ng QLTN";
+            Text = "Hệ thống QLTN";
             ResumeLayout(false);
         }
     }

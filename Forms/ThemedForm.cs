@@ -13,7 +13,7 @@ namespace QLTN.Forms
     /// - Consistent accent colours for primary actions and links
     /// - Utility helpers to centre content and style common controls
     /// </summary>
-    public class ThemedForm : Form
+    public partial class ThemedForm : Form
     {
         protected static readonly Color SurfaceColor = Color.FromArgb(217, 50, 50, 50);
         protected static readonly Color SurfaceBorderColor = Color.FromArgb(80, 255, 255, 255);
@@ -364,6 +364,86 @@ namespace QLTN.Forms
 
             Control[] matches = Controls.Find(controlName, true);
             return matches.Length > 0 ? matches[0] as TControl : null;
+        }
+
+        protected static void ApplyRoundedCorners(Control control, int radius, Corners corners)
+        {
+            if (control == null)
+            {
+                return;
+            }
+
+            if (radius <= 0)
+            {
+                control.Region = null;
+                return;
+            }
+
+            if (control.Width <= 0 || control.Height <= 0)
+            {
+                return;
+            }
+
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                int width = control.Width;
+                int height = control.Height;
+
+                bool topLeft = corners.HasFlag(Corners.TopLeft);
+                bool topRight = corners.HasFlag(Corners.TopRight);
+                bool bottomRight = corners.HasFlag(Corners.BottomRight);
+                bool bottomLeft = corners.HasFlag(Corners.BottomLeft);
+
+                if (topLeft)
+                {
+                    path.AddArc(0, 0, radius, radius, 180, 90);
+                }
+                else
+                {
+                    path.AddLine(0, 0, radius, 0);
+                }
+
+                if (topRight)
+                {
+                    path.AddArc(width - radius, 0, radius, radius, 270, 90);
+                }
+                else
+                {
+                    path.AddLine(width, 0, width, radius);
+                }
+
+                if (bottomRight)
+                {
+                    path.AddArc(width - radius, height - radius, radius, radius, 0, 90);
+                }
+                else
+                {
+                    path.AddLine(width, height, width - radius, height);
+                }
+
+                if (bottomLeft)
+                {
+                    path.AddArc(0, height - radius, radius, radius, 90, 90);
+                }
+                else
+                {
+                    path.AddLine(0, height, 0, height - radius);
+                }
+
+                path.CloseAllFigures();
+                control.Region = new Region(path);
+            }
+        }
+
+        [Flags]
+        protected enum Corners
+        {
+            None = 0,
+            TopLeft = 1,
+            TopRight = 2,
+            BottomRight = 4,
+            BottomLeft = 8,
+            All = TopLeft | TopRight | BottomRight | BottomLeft
         }
     }
 }

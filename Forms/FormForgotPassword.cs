@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Configuration;
 using System.Drawing;
 using System.Text.RegularExpressions;
@@ -44,10 +44,10 @@ namespace QLTN.Forms
 
         private void SetupControls()
         {
-            _mainPanel = CreateSurfacePanel(new Size(420, 320));
+            _mainPanel = CreateSurfacePanel(new Size(400, 340));
             _mainPanel.Anchor = AnchorStyles.None;
-            _mainPanel.MinimumSize = new Size(420, 0);
-            _mainPanel.MaximumSize = new Size(420, int.MaxValue);
+            _mainPanel.MinimumSize = new Size(400, 0);
+            _mainPanel.MaximumSize = new Size(400, int.MaxValue);
             Controls.Add(_mainPanel);
             AttachCentering(_mainPanel);
 
@@ -275,14 +275,14 @@ namespace QLTN.Forms
                 return;
             }
 
-            const int panelTopPadding = 32;
-            const int titleSpacing = 56;
-            const int labelToInputSpacing = 8;
-            const int inputSpacing = 24;
+            const int panelTopPadding = 36;
+            const int titleSpacing = 48;
+            const int labelToInputSpacing = 6;
+            const int inputSpacing = 18;
             const int errorSpacingVisible = 18;
             const int errorSpacingHidden = 12;
-            const int buttonSpacing = 20;
-            const int bottomPadding = 28;
+            const int buttonSpacing = 22;
+            const int bottomPadding = 30;
 
             int currentY = panelTopPadding;
             int centerX = CenterContentX(_mainPanel.Width, ContentWidth);

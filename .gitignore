@@ -8,3 +8,48 @@
 # NuGet packages (restore on demand)
 /packages/
 
+# API tokens and sensitive data
+privatetokenapigoogle.txt
+App.config
+*.txt
+*.key
+*.pem
+*.p12
+*.pfx
+*.env
+*.secret
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+*.accdb
+
+# Log files
+*.log
+*.log.*
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.backup
+*.old

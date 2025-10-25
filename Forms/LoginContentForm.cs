@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -10,6 +10,10 @@ namespace QLTN.Forms
 {
     public partial class LoginContentForm : ThemedForm, IAuthView
     {
+        /// <summary>
+        /// Event được gọi khi login thành công
+        /// </summary>
+        public static event Action<User> OnLoginSuccess;
         private const int ContentWidth = 320;
         private static readonly Size TargetFormSize = new Size(1024, 576);
         private readonly UserService userService = new UserService();
@@ -232,9 +236,20 @@ namespace QLTN.Forms
 
                 if (userService.Authenticate(request))
                 {
-                    MessageBox.Show("Đăng nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    SetValidationState(_passwordTextBox, ValidationState.Success);
-                    ShowNextForm(new FormMainSystem());
+                    // Lấy thông tin user từ database
+                    User user = userService.GetUserByPhone(phone);
+                    if (user != null)
+                    {
+                        MessageBox.Show("Đăng nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        SetValidationState(_passwordTextBox, ValidationState.Success);
+                        
+                        // Gọi event để thông báo login thành công
+                        OnLoginSuccess?.Invoke(user);
+                    }
+                    else
+                    {
+                        ShowError("Không thể lấy thông tin người dùng", _phoneTextBox, _passwordTextBox);
+                    }
                 }
                 else
                 {
@@ -415,22 +430,10 @@ namespace QLTN.Forms
                 return;
             }
 
-            if (form is FormMainSystem mainSystemForm)
+            if (form is FormMainSystem)
             {
-                Form shellForm = TopLevelControl as Form;
-
-                if (shellForm != null && !shellForm.IsDisposed)
-                {
-                    shellForm.Hide();
-                    shellForm.Enabled = false;
-                    shellForm.ShowInTaskbar = false;
-                }
-
-                mainSystemForm.StartPosition = FormStartPosition.CenterScreen;
-                mainSystemForm.FormClosed += (s, e) => Application.Exit();
-                mainSystemForm.Show();
-                mainSystemForm.Activate();
-
+                // Navigate the main system into the current host panel so there is no separate top-level window
+                AuthNavigationManager.Navigate<FormMainSystem>(this);
                 return;
             }
 

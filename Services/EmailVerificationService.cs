@@ -16,7 +16,7 @@ namespace QLTN.Services
         private static readonly ConcurrentDictionary<string, VerificationTicket> Tickets =
             new ConcurrentDictionary<string, VerificationTicket>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly GmailApiClient gmailClient;
+        private readonly QLTN.API.Google.GmailApiClient gmailClient;
         private readonly N8nWorkflowClient n8nClient;
         private readonly bool useN8nManagedWorkflow;
 

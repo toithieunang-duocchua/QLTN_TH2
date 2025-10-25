@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Text.RegularExpressions;
@@ -33,24 +33,24 @@ namespace QLTN.Forms
 
         private void SetupForm()
         {
-            Text = "\u0110\u1EB7t l\u1EA1i m\u1EADt kh\u1EA9u - H\u1EC7 th\u1ED1ng QLTN";
+            Text = "Đặt lại mật khẩu - Hệ thống QLTN";
             Size = TargetFormSize;
             MinimumSize = TargetFormSize;
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.Sizable;
             MaximizeBox = true;
 
-            _mainPanel = CreateSurfacePanel(new Size(420, 420));
+            _mainPanel = CreateSurfacePanel(new Size(400, 380));
             _mainPanel.Anchor = AnchorStyles.None;
-            _mainPanel.MinimumSize = new Size(420, 0);
-            _mainPanel.MaximumSize = new Size(420, int.MaxValue);
+            _mainPanel.MinimumSize = new Size(400, 0);
+            _mainPanel.MaximumSize = new Size(400, int.MaxValue);
             Controls.Add(_mainPanel);
             AttachCentering(_mainPanel);
 
             _titleLabel = new Label
             {
                 Name = "lblTitle",
-                Text = "\u0110\u1EB7t l\u1EA1i m\u1EADt kh\u1EA9u",
+                Text = "Đặt lại mật khẩu",
                 Font = new Font("Segoe UI", 24, FontStyle.Bold),
                 ForeColor = Color.White,
                 Size = new Size(_mainPanel.Width, 40),
@@ -59,7 +59,7 @@ namespace QLTN.Forms
             };
             _mainPanel.Controls.Add(_titleLabel);
 
-            _newPasswordLabel = CreateCenteredLabel("M\u1EADt kh\u1EA9u m\u1EDBi", _mainPanel.Width, 0);
+            _newPasswordLabel = CreateCenteredLabel("Mật khẩu mới", _mainPanel.Width, 0);
             _mainPanel.Controls.Add(_newPasswordLabel);
 
             _newPasswordTextBox = CreatePasswordTextBox("txtNewPassword");
@@ -80,7 +80,7 @@ namespace QLTN.Forms
             };
             _mainPanel.Controls.Add(_strengthLabel);
 
-            _confirmPasswordLabel = CreateCenteredLabel("X\u00E1c nh\u1EADn m\u1EADt kh\u1EA9u m\u1EDBi", _mainPanel.Width, 0);
+            _confirmPasswordLabel = CreateCenteredLabel("Xác nhận mật khẩu mới", _mainPanel.Width, 0);
             _mainPanel.Controls.Add(_confirmPasswordLabel);
 
             _confirmPasswordTextBox = CreatePasswordTextBox("txtConfirmPassword");
@@ -102,7 +102,7 @@ namespace QLTN.Forms
             _completeButton = new Button
             {
                 Name = "btnComplete",
-                Text = "Ho\u00E0n t\u1EA5t",
+                Text = "Hoàn tất",
                 Size = new Size(ContentWidth, 42),
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 Padding = new Padding(0, 2, 0, 2)
@@ -112,7 +112,7 @@ namespace QLTN.Forms
             _mainPanel.Controls.Add(_completeButton);
             AcceptButton = _completeButton;
 
-            _backLink = CreateLinkLabel("Quay l\u1EA1i \u0111\u0103ng nh\u1EADp", 0, _mainPanel.Width);
+            _backLink = CreateLinkLabel("Quay lại đăng nhập", 0, _mainPanel.Width);
             _backLink.Click += (s, e) => ShowNextForm<LoginContentForm>();
             _mainPanel.Controls.Add(_backLink);
 
@@ -179,16 +179,16 @@ namespace QLTN.Forms
             }
 
             const int panelTopPadding = 36;
-            const int titleSpacing = 60;
-            const int labelToInputSpacing = 8;
+            const int titleSpacing = 48;
+            const int labelToInputSpacing = 6;
             const int inputToHelperSpacing = 6;
             const int helperSpacingVisible = 6;
-            const int helperSpacingHidden = 18;
-            const int inputsSpacing = 20;
+            const int helperSpacingHidden = 16;
+            const int inputsSpacing = 18;
             const int errorSpacingVisible = 16;
             const int errorSpacingHidden = 12;
-            const int buttonSpacing = 20;
-            const int bottomPadding = 32;
+            const int buttonSpacing = 22;
+            const int bottomPadding = 30;
 
             int centerX = CenterContentX(_mainPanel.Width, ContentWidth);
             int currentY = panelTopPadding;
@@ -348,17 +348,17 @@ namespace QLTN.Forms
             int strength = CalculatePasswordStrength(password);
             if (strength <= 2)
             {
-                _strengthLabel.Text = "M\u1EADt kh\u1EA9u y\u1EBFu";
+                _strengthLabel.Text = "Mật khẩu yếu";
                 _strengthLabel.ForeColor = Color.FromArgb(255, 107, 107);
             }
             else if (strength <= 4)
             {
-                _strengthLabel.Text = "M\u1EADt kh\u1EA9u trung b\u00ECnh";
+                _strengthLabel.Text = "Mật khẩu trung bình";
                 _strengthLabel.ForeColor = Color.FromArgb(255, 211, 61);
             }
             else
             {
-                _strengthLabel.Text = "M\u1EADt kh\u1EA9u m\u1EA1nh";
+                _strengthLabel.Text = "Mật khẩu mạnh";
                 _strengthLabel.ForeColor = Color.FromArgb(107, 207, 127);
             }
 
@@ -407,14 +407,14 @@ namespace QLTN.Forms
 
             if (string.IsNullOrWhiteSpace(newPassword))
             {
-                ShowError("Vui l\u00F2ng nh\u1EADp m\u1EADt kh\u1EA9u m\u1EDBi", _newPasswordTextBox);
+                ShowError("Vui lòng nhập mật khẩu mới", _newPasswordTextBox);
                 _newPasswordTextBox.Focus();
                 return;
             }
 
             if (!IsStrongPassword(newPassword))
             {
-                ShowError("M\u1EADt kh\u1EA9u m\u1EDBi ph\u1EA3i \u0111\u1EE7 m\u1EA1nh (>=8 k\u00FD t\u1EF1, c\u00F3 ch\u1EEF hoa, ch\u1EEF th\u01B0\u1EDDng, ch\u1EEF s\u1ED1 v\u00E0 k\u00FD t\u1EF1 \u0111\u1EB7c bi\u1EC7t)", _newPasswordTextBox);
+                ShowError("Mật khẩu mới phải đủ mạnh (>=8 ký tự, có chữ hoa, chữ thường, chữ số và ký tự đặc biệt)", _newPasswordTextBox);
                 _newPasswordTextBox.Focus();
                 return;
             }
@@ -422,14 +422,14 @@ namespace QLTN.Forms
 
             if (string.IsNullOrWhiteSpace(confirmPassword))
             {
-                ShowError("Vui l\u00F2ng x\u00E1c nh\u1EADn m\u1EADt kh\u1EA9u m\u1EDBi", _confirmPasswordTextBox);
+                ShowError("Vui lòng xác nhận mật khẩu mới", _confirmPasswordTextBox);
                 _confirmPasswordTextBox.Focus();
                 return;
             }
 
             if (!string.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
             {
-                ShowError("M\u1EADt kh\u1EA9u x\u00E1c nh\u1EADn kh\u00F4ng kh\u1EDBp", _newPasswordTextBox, _confirmPasswordTextBox);
+                ShowError("Mật khẩu xác nhận không khớp", _newPasswordTextBox, _confirmPasswordTextBox);
                 _confirmPasswordTextBox.Focus();
                 return;
             }
@@ -439,13 +439,13 @@ namespace QLTN.Forms
             {
                 UpdatePassword(userEmail, newPassword);
 
-                MessageBox.Show("\u0110\u1EB7t l\u1EA1i m\u1EADt kh\u1EA9u th\u00E0nh c\u00F4ng! Vui l\u00F2ng \u0111\u0103ng nh\u1EADp l\u1EA1i.", "Th\u00F4ng b\u00E1o", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 ShowNextForm<LoginContentForm>();
             }
             catch (Exception ex)
             {
-                ShowError($"L\u1ED7i: {ex.Message}", _newPasswordTextBox, _confirmPasswordTextBox);
+                ShowError($"Lỗi: {ex.Message}", _newPasswordTextBox, _confirmPasswordTextBox);
             }
         }
 
@@ -540,7 +540,7 @@ namespace QLTN.Forms
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1024, 576);
             Name = "FormResetPassword";
-            Text = "\u0110\u1EB7t l\u1EA1i m\u1EADt kh\u1EA9u";
+            Text = "Đặt lại mật khẩu";
             ResumeLayout(false);
         }
     }

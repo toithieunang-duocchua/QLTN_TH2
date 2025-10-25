@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 
@@ -11,16 +12,15 @@ namespace QLTN.Forms
     {
         private static readonly Size TargetFormSize = new Size(1024, 576);
         string path = Path.Combine(Application.StartupPath, "Assets", "logo.png");
-        
 
-        private Panel sidebar;
-        private Panel mainPanel;
+
+        private Panel sidebar, mainPanel, topPanel;
 
         public FormMainSystem()
         {
             InitializeComponent();
-            SetupForm();     
-            LoadWpfControl(); 
+            SetupForm();
+            LoadWpfControl();
         }
 
         private void LoadWpfControl()
@@ -40,7 +40,7 @@ namespace QLTN.Forms
         {
             // Clear existing controls
             mainPanel.Controls.Clear();
-            
+
             // Add the form to mainPanel
             mainPanel.Controls.Add(form);
             form.Show();
@@ -59,7 +59,7 @@ namespace QLTN.Forms
             sidebar = new Panel
             {
                 Dock = DockStyle.Left,
-                Width = 250,
+                Width = 270,
                 BackColor = Color.White
             };
 
@@ -82,14 +82,109 @@ namespace QLTN.Forms
             };
 
 
+            // ======= TOP PANEL =======
+            topPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 90,
+                BackColor = Color.White,
+                Padding = new Padding(20, 15, 20, 15)
+            };
+
+            // Tiêu đề lớn
+            Label lblTitle = new Label
+            {
+                Text = "Đang xem:",
+                Font = new Font("Segoe UI Semibold", 16, FontStyle.Bold),
+                ForeColor = Color.FromArgb(60, 60, 60),
+                AutoSize = true,
+                Location = new Point(10, 10)
+            };
+            topPanel.Controls.Add(lblTitle);
+
+            // Tên nhà
+            Label lblHouseName = new Label
+            {
+                Text = "Nhà A",
+                Font = new Font("Segoe UI Semibold", 16, FontStyle.Bold),
+                ForeColor = Color.FromArgb(80, 80, 200),
+                AutoSize = true,
+                Location = new Point(lblTitle.Right + 120, 10),
+                Name = "lblHouseName"
+            };
+            topPanel.Controls.Add(lblHouseName);
+
+            // Địa chỉ
+            Label lblAddress = new Label
+            {
+                Text = "19 Nguyễn Thị Thập, Q7",
+                Font = new Font("Segoe UI", 10, FontStyle.Regular),
+                ForeColor = Color.Gray,
+                AutoSize = true,
+                Location = new Point(15, 50),
+                Name = "lblAddress"
+            };
+            topPanel.Controls.Add(lblAddress);
+
+            // ComboBox chọn nhà
+            ComboBox cbHouse = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 11),
+                Width = 200,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Location = new Point(topPanel.Width - 230, 25),
+                Name = "cbHouse"
+            };
+            cbHouse.Items.AddRange(new string[] { "Nhà A", "Nhà B", "Nhà C" });
+            cbHouse.SelectedIndex = 0;
+
+            // Sự kiện chọn nhà
+            cbHouse.SelectedIndexChanged += (s, e) =>
+            {
+                var name = cbHouse.SelectedItem.ToString();
+                lblHouseName.Text = name;
+
+                string address;
+                switch (name)
+                {
+                    case "Nhà A":
+                        address = "19 Nguyễn Thị Thập, Q7";
+                        break;
+                    case "Nhà B":
+                        address = "52 Cộng Hòa, Tân Bình";
+                        break;
+                    case "Nhà C":
+                        address = "10 Pasteur, Q1";
+                        break;
+                    default:
+                        address = "Không rõ địa chỉ";
+                        break;
+                }
+
+                lblAddress.Text = address;
+            };
+
+            topPanel.Resize += (s, e) =>
+            {
+                cbHouse.Left = topPanel.Width - cbHouse.Width - 20;
+            };
+
+            topPanel.Controls.Add(cbHouse);
+
             Controls.Add(mainPanel);
+
+            Controls.Add(topPanel);
+
             Controls.Add(sidebar);
 
             AuthNavigationManager.Initialize(mainPanel);
 
+            AddSidebarButton("\uf15c", "Trang Chủ", (s, e) => ShowMessage("Trang Chủ"));
             AddSidebarButton("\uf52b", "Nhà && Phòng", (s, e) => AuthNavigationManager.LoadWinForm<FormHouseManagement>());
             AddSidebarButton("\uf0c0", "Người thuê", (s, e) => AuthNavigationManager.LoadWpfControl<FormTenantManagerment>());
             AddSidebarButton("\uf15c", "Hợp đồng", (s, e) => ShowMessage("Hợp đồng"));
+            AddSidebarButton("\uf15c", "Quản lý phương tiện", (s, e) => ShowMessage("Quản lý phương tiện"));
             AddSidebarButton("\uf555", "Tài chính", (s, e) => ShowMessage("Tài chính"));
             AddSidebarButton("\uf53a", "Thanh Toán", (s, e) => ShowMessage("Thanh Toán"));
             AddSidebarButton("\uf201", "Báo cáo && Thống kê", (s, e) => ShowMessage("Báo cáo & Thống kê"));
@@ -112,7 +207,7 @@ namespace QLTN.Forms
             Label lblIcon = new Label
             {
                 Text = icon,
-                Font = new Font("Font Awesome 7 Free Solid", 16, FontStyle.Regular),
+                Font = new Font("Font Awesome 7 Free Solid", 14, FontStyle.Regular),
                 Dock = DockStyle.Left,
                 Width = 45,
                 TextAlign = ContentAlignment.MiddleCenter
@@ -122,7 +217,7 @@ namespace QLTN.Forms
             Label lblText = new Label
             {
                 Text = txt,
-                Font = new Font("Segoe UI", 13, FontStyle.Bold),
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleLeft,
                 Padding = new Padding(5, 0, 0, 0)

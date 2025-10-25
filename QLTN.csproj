@@ -147,9 +147,6 @@
     <Compile Include="Forms\FormTenantManagerment.xaml.cs">
       <DependentUpon>FormTenantManagerment.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\FormFingerPrint.xaml.cs">
-      <DependentUpon>FormFingerPrint.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Models\ForgotPasswordRequest.cs" />
     <Compile Include="Models\LoginRequest.cs" />
     <Compile Include="Models\RegisterRequest.cs" />
@@ -177,6 +174,8 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormMainSystem.resx">
       <DependentUpon>FormMainSystem.cs</DependentUpon>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>FormMainSystem.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormRegister.resx">
       <DependentUpon>FormRegister.cs</DependentUpon>
@@ -215,10 +214,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Forms\FormTenantManagerment.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\FormFingerPrint.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

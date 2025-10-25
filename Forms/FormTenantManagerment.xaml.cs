@@ -77,6 +77,20 @@ namespace QLTN.Forms
 
             DataContext = this;
         }
+
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("sua");
+        }
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Xóa");
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("thêm:");
+        }
         private void SearchBox_TextChanged_1(object sender, TextChangedEventArgs e)
         {
             Placeholder.Visibility = string.IsNullOrEmpty(SearchBox.Text) ? Visibility.Visible : Visibility.Hidden;
@@ -96,6 +110,5 @@ namespace QLTN.Forms
             public Brush MauHopDong { get; set; }
             public Brush MauChuHopDong { get; set; }
         }
-
     }
 }

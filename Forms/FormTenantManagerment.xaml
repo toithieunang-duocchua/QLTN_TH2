@@ -106,6 +106,27 @@
             </Setter>
         </Style>
 
+        <!-- Style for small action buttons -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="6"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="0"
+                            Padding="10,6">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="CenteredText" TargetType="TextBlock">
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -182,7 +203,7 @@
 
                 <!-- Room Filter -->
                 <ComboBox Grid.Column="1"
-                          Width="140"
+                          Width="170"
                           Height="44"
                           SelectedIndex="0"
                           VerticalAlignment="Center"
@@ -200,8 +221,8 @@
                         Height="44"
                         Background="#5B63D0"
                         Foreground="White"
-                        FontSize="14"
-                        VerticalAlignment="Center"/>
+                        FontSize="12"
+                        VerticalAlignment="Center" Click="Button_Click"/>
             </Grid>
         </Border>
 
@@ -283,23 +304,14 @@
                 <!-- DataGrid Columns -->
                 <DataGrid.Columns>
 
-                    <!-- Column: NGƯỜI THUÊ with Avatar -->
+                    <!-- Column: NGƯỜI THUÊ -->
                     <DataGridTemplateColumn Header="NGƯỜI THUÊ" Width="1.3*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal"
                                             VerticalAlignment="Center"
                                             HorizontalAlignment="Left">
-                                    <Border Width="40" Height="40" CornerRadius="20" 
-                                            Background="#5B63D0" 
-                                            Margin="0,0,12,0">
-                                        <TextBlock Text="{Binding Avatar}"
-                                                   Foreground="White"
-                                                   FontWeight="Bold"
-                                                   FontSize="16"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
+
                                     <TextBlock Text="{Binding Ten}"
                                                FontSize="13"
                                                FontWeight="SemiBold"
@@ -320,11 +332,6 @@
                                         Binding="{Binding SDT}"
                                         Width="1.2*"/>
 
-                    <!-- Column: SỐ NGƯỜI Ở -->
-                    <DataGridTextColumn Header="SỐ NGƯỜI Ở"
-                                        Binding="{Binding SoNguoiO}"
-                                        Width="0.8*"
-                                        ElementStyle="{StaticResource CenteredText}"/>
 
                     <!-- Column: TRẠNG THÁI VÂN TAY -->
                     <DataGridTemplateColumn Header="TRẠNG THÁI VÂN TAY" Width="1.1*">
@@ -361,6 +368,61 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+
+                    <!-- Column: CHỈNH SỬA -->
+                    <DataGridTemplateColumn Header="CHỈNH SỬA" Width="0.9*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="✏️ Sửa"
+                                        Background="#DFF6E3"
+                                        Foreground= "#4CAF50"
+                                        FontSize="11"
+                                        FontWeight="SemiBold"
+                                        Padding="8,5"
+                                        Click="EditButton_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border CornerRadius="6"
+                                                Background="{TemplateBinding Background}"
+                                                BorderThickness="0"
+                                                Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Column: XÓA -->
+                    <DataGridTemplateColumn Header="XÓA" Width="0.9*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="🗑️ Xóa"
+                                        Background="#F44336"
+                                        Foreground="White"
+                                        FontSize="11"
+                                        FontWeight="SemiBold"
+                                        Padding="8,5"
+                                        Click="DeleteButton_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border CornerRadius="6"
+                                                Background="{TemplateBinding Background}"
+                                                BorderThickness="0"
+                                                Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

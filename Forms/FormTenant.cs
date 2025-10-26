@@ -51,12 +51,20 @@ namespace QLTN.Forms
             PhoneColumn.DataPropertyName = nameof(Tenant.PhoneNumber);
             StatusColumn.DataPropertyName = nameof(Tenant.ContractStatus);
 
-            if (ActionColumn != null)
+            if (EditColumn != null)
             {
-                ActionColumn.TrackVisitedState = false;
-                ActionColumn.LinkColor = Color.Black;
-                ActionColumn.VisitedLinkColor = Color.Black;
-                ActionColumn.ActiveLinkColor = Color.Black;
+                EditColumn.TrackVisitedState = false;
+                EditColumn.LinkColor = Color.FromArgb(94, 148, 255);
+                EditColumn.VisitedLinkColor = Color.FromArgb(94, 148, 255);
+                EditColumn.ActiveLinkColor = Color.FromArgb(94, 148, 255);
+            }
+
+            if (DeleteColumn != null)
+            {
+                DeleteColumn.TrackVisitedState = false;
+                DeleteColumn.LinkColor = Color.FromArgb(255, 77, 79);
+                DeleteColumn.VisitedLinkColor = Color.FromArgb(255, 77, 79);
+                DeleteColumn.ActiveLinkColor = Color.FromArgb(255, 77, 79);
             }
         }
 
@@ -121,14 +129,80 @@ namespace QLTN.Forms
 
         private void DataGridViewTenants_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || e.ColumnIndex != ActionColumn.Index)
+            if (e.RowIndex < 0)
             {
                 return;
             }
 
-            if (tenantBindingSource[e.RowIndex] is Tenant tenant)
+            if (!(tenantBindingSource[e.RowIndex] is Tenant tenant))
             {
-                ShowTenantDetail(tenant);
+                return;
+            }
+
+            // Handle Edit button
+            if (e.ColumnIndex == EditColumn.Index)
+            {
+                EditTenant(tenant);
+            }
+            // Handle Delete button
+            else if (e.ColumnIndex == DeleteColumn.Index)
+            {
+                DeleteTenant(tenant);
+            }
+        }
+
+        private void EditTenant(Tenant tenant)
+        {
+            if (tenant == null)
+            {
+                return;
+            }
+
+            // TODO: Implement edit tenant functionality
+            // This will open an edit form or inline edit
+            MessageBox.Show(
+                $"Chuc nang sua nguoi thue se duoc phat trien.\n\nThong tin:\nTen: {tenant.FullName}\nPhong: {tenant.RoomCode}",
+                "Sua nguoi thue",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        private void DeleteTenant(Tenant tenant)
+        {
+            if (tenant == null)
+            {
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(
+                $"Ban co chac chan muon xoa nguoi thue '{tenant.FullName}'?\n\nPhong: {tenant.RoomCode}\nSo dien thoai: {tenant.PhoneNumber}",
+                "Xac nhan xoa",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    // TODO: Implement delete tenant functionality
+                    // tenantService.DeleteTenant(tenant.Id);
+                    MessageBox.Show(
+                        $"Da xoa nguoi thue '{tenant.FullName}' thanh cong.",
+                        "Xoa thanh cong",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                    
+                    // Reload data
+                    LoadTenantData();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Khong the xoa nguoi thue.\nChi tiet: {ex.Message}",
+                        "Loi",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
             }
         }
 

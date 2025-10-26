@@ -27,7 +27,8 @@ namespace QLTN.Forms
             this.RoomColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.PhoneColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.StatusColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ActionColumn = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.EditColumn = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.DeleteColumn = new System.Windows.Forms.DataGridViewLinkColumn();
             this.panelTop = new Guna.UI2.WinForms.Guna2Panel();
             this.btnAddTenant = new Guna.UI2.WinForms.Guna2Button();
             this.txtSearch = new Guna.UI2.WinForms.Guna2TextBox();
@@ -77,7 +78,8 @@ namespace QLTN.Forms
             this.RoomColumn,
             this.PhoneColumn,
             this.StatusColumn,
-            this.ActionColumn});
+            this.EditColumn,
+            this.DeleteColumn});
             this.dataGridViewTenants.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewTenants.EnableHeadersVisualStyles = false;
             this.dataGridViewTenants.GridColor = System.Drawing.Color.FromArgb(235, 235, 235);
@@ -125,16 +127,27 @@ namespace QLTN.Forms
             this.StatusColumn.Name = "StatusColumn";
             this.StatusColumn.ReadOnly = true;
             // 
-            // ActionColumn
+            // EditColumn
             // 
-            this.ActionColumn.FillWeight = 15F;
-            this.ActionColumn.HeaderText = "Thao tac";
-            this.ActionColumn.Name = "ActionColumn";
-            this.ActionColumn.ReadOnly = true;
-            this.ActionColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ActionColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.ActionColumn.Text = "Xem";
-            this.ActionColumn.UseColumnTextForLinkValue = true;
+            this.EditColumn.FillWeight = 10F;
+            this.EditColumn.HeaderText = "Sửa";
+            this.EditColumn.Name = "EditColumn";
+            this.EditColumn.ReadOnly = true;
+            this.EditColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.EditColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.EditColumn.Text = "Sửa";
+            this.EditColumn.UseColumnTextForLinkValue = true;
+            // 
+            // DeleteColumn
+            // 
+            this.DeleteColumn.FillWeight = 10F;
+            this.DeleteColumn.HeaderText = "Xóa";
+            this.DeleteColumn.Name = "DeleteColumn";
+            this.DeleteColumn.ReadOnly = true;
+            this.DeleteColumn.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.DeleteColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.DeleteColumn.Text = "Xóa";
+            this.DeleteColumn.UseColumnTextForLinkValue = true;
             // 
             // panelTop
             // 
@@ -226,7 +239,8 @@ namespace QLTN.Forms
         private DataGridViewTextBoxColumn RoomColumn;
         private DataGridViewTextBoxColumn PhoneColumn;
         private DataGridViewTextBoxColumn StatusColumn;
-        private DataGridViewLinkColumn ActionColumn;
+        private DataGridViewLinkColumn EditColumn;
+        private DataGridViewLinkColumn DeleteColumn;
         private Guna2Panel panelTop;
         private Guna2Button btnAddTenant;
         private Guna2TextBox txtSearch;

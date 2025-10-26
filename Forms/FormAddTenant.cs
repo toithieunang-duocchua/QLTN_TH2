@@ -34,6 +34,7 @@ namespace QLTN.Forms
         {
             btnSave.Click += BtnSave_Click;
             btnRefresh.Click += BtnRefresh_Click;
+            btnBack.Click += BtnBack_Click;
         }
 
         private void LoadAvailableRooms()
@@ -175,6 +176,21 @@ namespace QLTN.Forms
             cmbFingerprintStatus.SelectedIndex = 0;
             dtpStartDate.Value = DateTime.Today;
             dtpEndDate.Value = DateTime.Today.AddMonths(12);
+        }
+
+        private void BtnBack_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(
+                "Ban co chac chan muon quay lai? Cac thay doi se khong duoc luu.",
+                "Xac nhan quay lai",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                DialogResult = DialogResult.Cancel;
+                Close();
+            }
         }
 
         private sealed class ComboItem

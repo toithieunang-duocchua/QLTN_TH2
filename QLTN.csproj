@@ -124,12 +124,12 @@
     <Compile Include="Forms\FormListRoom.cs">
       <SubType>Form</SubType>
     </Compile>
-    <!-- <Compile Include="Forms\FormAddRoom.cs">
+    <Compile Include="Forms\FormAddRoom.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\FormAddRoom.Designer.cs">
       <DependentUpon>FormAddRoom.cs</DependentUpon>
-    </Compile> -->
+    </Compile>
     <Compile Include="Forms\FormAddTenant.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -213,6 +213,9 @@
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\VerificationRequest.cs" />
     <Compile Include="Models\VietQRModels.cs" />
+    <Compile Include="Models\House.cs" />
+    <Compile Include="Models\Room.cs" />
+    <Compile Include="Models\Tenant.cs" />
     <Compile Include="Services\EmailVerificationService.cs" />
     <Compile Include="Services\AuditLogger.cs" />
     <Compile Include="Services\ApplicationManager.cs" />
@@ -220,6 +223,10 @@
     <Compile Include="Services\UserService.cs" />
     <Compile Include="Services\PaymentService.cs" />
     <Compile Include="Services\VietQRBankService.cs" />
+    <Compile Include="Services\HouseService.cs" />
+    <Compile Include="Services\RoomService.cs" />
+    <Compile Include="Services\TenantService.cs" />
+    <Compile Include="Services\ContractMonitorService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\EmailValidator.cs" />

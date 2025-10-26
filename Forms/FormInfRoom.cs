@@ -1,272 +1,298 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Guna.UI2.WinForms;
+using QLTN.Models;
+using QLTN.Services;
+
 
 namespace QLTN.Forms
 {
     public partial class FormInfRoom : Form
     {
-        private string roomNumber;
-        private bool isEditMode = false;
+        private readonly RoomService roomService = new RoomService();
+        private readonly Room room;
+        private bool isEditMode;
+        private readonly Dictionary<Guna2CheckBox, string> amenityMap = new Dictionary<Guna2CheckBox, string>();
 
-        public FormInfRoom(string roomNumber)
+        public FormInfRoom(Room room)
         {
-            this.roomNumber = roomNumber;
+            this.room = room ?? throw new ArgumentNullException(nameof(room));
             InitializeComponent();
-            SetupForm();
+            InitializeAmenities();
+            ConfigureForm();
+            HookEvents();
             LoadRoomData();
         }
 
-        private void SetupForm()
+        private void InitializeAmenities()
         {
-            // Set form properties
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.FormBorderStyle = FormBorderStyle.Sizable; // Cho phép resize
-            this.MaximizeBox = true;
-            this.MinimizeBox = true;
-            this.MinimumSize = new Size(800, 700); // Kích thước tối thiểu
-            this.AutoScaleMode = AutoScaleMode.Dpi; // Cải thiện scaling
-            
-            // Thêm event handler cho resize
-            this.Resize += FormInfRoom_Resize;
+            amenityMap.Add(chkRefrigerator, "Tu lanh");
+            amenityMap.Add(chkAirConditioner, "May lanh");
+            amenityMap.Add(chkWashingMachine, "May giat");
+            amenityMap.Add(chkTable, "Ban");
+            amenityMap.Add(chkWardrobe, "Tu ao");
+            amenityMap.Add(chkChair, "Ghe");
         }
-        
-        private void FormInfRoom_Resize(object sender, EventArgs e)
+
+        private void ConfigureForm()
         {
-            // Đảm bảo form không bị thu nhỏ quá mức
-            if (this.Width < 800)
-            {
-                this.Width = 800;
-            }
-            if (this.Height < 700)
-            {
-                this.Height = 700;
-            }
+            StartPosition = FormStartPosition.CenterParent;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            BackColor = Color.White;
+
+            cmbStatus.Items.Clear();
+            cmbStatus.Items.AddRange(new object[] { "Trong", "Dang thue", "Du kien", "Dang sua", "Bao tri" });
+        }
+
+        private void HookEvents()
+        {
+            btnEdit.Click += BtnEdit_Click;
+            btnSave.Click += BtnSave_Click;
+            btnBack.Click += (s, _) => Close();
+            checkNone.CheckedChanged += CheckNone_CheckedChanged;
         }
 
         private void LoadRoomData()
         {
-            // Load room data based on room number
-            txtRoomCode.Text = $"P{roomNumber}";
-            
-            // Set furniture based on room (example data)
-            if (roomNumber == "101")
-            {
-                txtArea.Text = "25";
-                txtRentPrice.Text = "3500000";
-                cmbStatus.SelectedIndex = 0; // "Trống"
-                txtNotes.Text = "Phòng có ban công nhỏ, hướng gió mát.";
-                
-                // Furniture for room 101
-                chkRefrigerator.Checked = true;
-                chkAirConditioner.Checked = true;
-                chkWashingMachine.Checked = false;
-                chkTable.Checked = true;
-                chkWardrobe.Checked = true;
-                chkChair.Checked = false;
-                checkNone.Checked = false;
-            }
-            else if (roomNumber == "102")
-            {
-                txtArea.Text = "25";
-                txtRentPrice.Text = "3800000";
-                cmbStatus.SelectedIndex = 1; // "Đang thuê"
-                txtNotes.Text = "Phòng có nội thất đầy đủ.";
-                
-                // Furniture for room 102
-                chkRefrigerator.Checked = true;
-                chkAirConditioner.Checked = true;
-                chkWashingMachine.Checked = true;
-                chkTable.Checked = true;
-                chkWardrobe.Checked = true;
-                chkChair.Checked = true;
-                checkNone.Checked = false;
-            }
-            else if (roomNumber == "103")
-            {
-                txtArea.Text = "30";
-                txtRentPrice.Text = "4000000";
-                cmbStatus.SelectedIndex = 0; // "Trống"
-                txtNotes.Text = "Phòng rộng rãi, có view đẹp.";
-                
-                // Furniture for room 103
-                chkRefrigerator.Checked = true;
-                chkAirConditioner.Checked = true;
-                chkWashingMachine.Checked = false;
-                chkTable.Checked = true;
-                chkWardrobe.Checked = true;
-                chkChair.Checked = true;
-                checkNone.Checked = false;
-            }
-            else if (roomNumber == "201")
-            {
-                txtArea.Text = "25";
-                txtRentPrice.Text = "3500000";
-                cmbStatus.SelectedIndex = 0; // "Trống"
-                txtNotes.Text = "Phòng tầng 2, yên tĩnh.";
-                
-                // Furniture for room 201
-                chkRefrigerator.Checked = true;
-                chkAirConditioner.Checked = true;
-                chkWashingMachine.Checked = false;
-                chkTable.Checked = true;
-                chkWardrobe.Checked = true;
-                chkChair.Checked = false;
-                checkNone.Checked = false;
-            }
+            txtRoomCode.Text = room.Code;
+            txtArea.Text = room.Area?.ToString("0.##") ?? string.Empty;
+            txtRentPrice.Text = room.RentPrice.ToString("0");
+            txtNotes.Text = room.Notes;
+            lblTitle.Text = $"Room {room.Code}";
 
-            // Set all controls to read-only initially
+            cmbStatus.SelectedItem = MapStatusToDisplay(room.Status);
+            ApplyAmenities(room.Amenities);
             SetControlsReadOnly(true);
         }
 
-        private void SetControlsReadOnly(bool readOnly)
+        private void ApplyAmenities(string amenities)
         {
-            txtRoomCode.ReadOnly = readOnly;
-            txtArea.ReadOnly = readOnly;
-            txtRentPrice.ReadOnly = readOnly;
-            txtNotes.ReadOnly = readOnly;
-
-            // Enable/disable checkboxes and combobox
-            chkRefrigerator.Enabled = !readOnly;
-            chkAirConditioner.Enabled = !readOnly;
-            chkWashingMachine.Enabled = !readOnly;
-            chkTable.Enabled = !readOnly;
-            chkWardrobe.Enabled = !readOnly;
-            chkChair.Enabled = !readOnly;
-            checkNone.Enabled = !readOnly;
-            cmbStatus.Enabled = !readOnly;
-
-            // Update button visibility
-            if (readOnly)
+            foreach (Guna2CheckBox checkbox in amenityMap.Keys)
             {
-                btnEdit.Text = "Sửa";
-                btnEdit.FillColor = Color.FromArgb(155, 89, 182);
-                btnEdit.Visible = true;
-                btnSave.Visible = false;
+                checkbox.CheckedChanged -= AmenityCheckBox_CheckedChanged;
+                checkbox.Checked = false;
+            }
+
+            checkNone.CheckedChanged -= CheckNone_CheckedChanged;
+            checkNone.Checked = false;
+
+            if (!string.IsNullOrWhiteSpace(amenities))
+            {
+                string[] tokens = amenities.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(item => item.Trim())
+                    .ToArray();
+
+                foreach (KeyValuePair<Guna2CheckBox, string> pair in amenityMap)
+                {
+                    if (tokens.Any(token => string.Equals(token, pair.Value, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        pair.Key.Checked = true;
+                    }
+                }
+
+                checkNone.Checked = amenityMap.Keys.All(cb => !cb.Checked);
             }
             else
             {
-                btnEdit.Text = "Hủy";
-                btnEdit.FillColor = Color.FromArgb(231, 76, 60);
-                btnEdit.Visible = true;
-                btnSave.Visible = true;
+                checkNone.Checked = true;
             }
+
+            foreach (Guna2CheckBox checkbox in amenityMap.Keys)
+            {
+                checkbox.CheckedChanged += AmenityCheckBox_CheckedChanged;
+            }
+
+            checkNone.CheckedChanged += CheckNone_CheckedChanged;
         }
 
         private void BtnEdit_Click(object sender, EventArgs e)
         {
+            isEditMode = !isEditMode;
+            SetControlsReadOnly(!isEditMode);
+
             if (!isEditMode)
             {
-                // Switch to edit mode
-                isEditMode = true;
-                SetControlsReadOnly(false);
-            }
-            else
-            {
-                // Cancel editing - switch back to view mode
-                isEditMode = false;
-                SetControlsReadOnly(true);
-                LoadRoomData(); // Reload original data
+                LoadRoomData();
             }
         }
 
         private void BtnSave_Click(object sender, EventArgs e)
         {
-            // Save changes
-            SaveChanges();
-        }
-
-        private void BtnBack_Click(object sender, EventArgs e)
-        {
-            // Navigate back to room management
-            FormMainSystem mainForm = Application.OpenForms.OfType<FormMainSystem>().FirstOrDefault();
-            if (mainForm != null)
+            if (!isEditMode)
             {
-                FormRoom formRoom = new FormRoom("Nhà A", "19 Nguyễn Thị Thập, Quận 7"); // Default values
-                formRoom.TopLevel = false;
-                formRoom.FormBorderStyle = FormBorderStyle.None;
-                formRoom.Dock = DockStyle.Fill;
-
-                mainForm.LoadFormIntoMainPanel(formRoom);
-            }
-        }
-
-        private void SaveChanges()
-        {
-            // Validate input
-            if (string.IsNullOrWhiteSpace(txtArea.Text))
-            {
-                MessageBox.Show("Vui lòng nhập diện tích!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtArea.Focus();
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtRentPrice.Text))
+            if (!ValidateInputs(out double? area, out decimal rentPrice, out RoomStatus status))
             {
-                MessageBox.Show("Vui lòng nhập giá thuê!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            room.Area = area;
+            room.RentPrice = rentPrice;
+            room.Status = status;
+            room.Notes = txtNotes.Text.Trim();
+            room.Amenities = CollectAmenities();
+
+            try
+            {
+                roomService.UpdateRoom(room);
+                MessageBox.Show("Room updated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                isEditMode = false;
+                SetControlsReadOnly(true);
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to update room.\nDetails: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private bool ValidateInputs(out double? area, out decimal rentPrice, out RoomStatus status)
+        {
+            area = null;
+            rentPrice = 0;
+            status = RoomStatus.Vacant;
+
+            if (!string.IsNullOrWhiteSpace(txtArea.Text))
+            {
+                if (!double.TryParse(txtArea.Text, out double parsedArea) || parsedArea < 0)
+                {
+                    MessageBox.Show("Area must be a non-negative number.", "Invalid data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtArea.Focus();
+                    return false;
+                }
+
+                area = parsedArea;
+            }
+
+            if (!decimal.TryParse(txtRentPrice.Text, out rentPrice) || rentPrice < 0)
+            {
+                MessageBox.Show("Rent must be a non-negative number.", "Invalid data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtRentPrice.Focus();
-                return;
+                return false;
             }
 
-            // Get furniture list
-            List<string> furnitureList = new List<string>();
-            if (chkRefrigerator.Checked) furnitureList.Add("Tủ lạnh");
-            if (chkAirConditioner.Checked) furnitureList.Add("Máy lạnh");
-            if (chkWashingMachine.Checked) furnitureList.Add("Máy giặt");
-            if (chkTable.Checked) furnitureList.Add("Bàn");
-            if (chkWardrobe.Checked) furnitureList.Add("Tủ áo quần");
-            if (chkChair.Checked) furnitureList.Add("Ghế");
-            if (checkNone.Checked) furnitureList.Add("Không có nội thất");
-
-            // Here you would typically save to database
-            // For now, just show a success message
-            MessageBox.Show($"Đã cập nhật thông tin phòng {roomNumber} thành công!\n\n" +
-                           $"Diện tích: {txtArea.Text} m²\n" +
-                           $"Giá thuê: {txtRentPrice.Text} VNĐ/tháng\n" +
-                           $"Trạng thái: {cmbStatus.SelectedItem?.ToString()}\n" +
-                           $"Nội thất: {string.Join(", ", furnitureList)}\n" +
-                           $"Ghi chú: {txtNotes.Text}", 
-                           "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            // Switch back to view mode
-            isEditMode = false;
-            SetControlsReadOnly(true);
+            status = ParseStatus(cmbStatus.SelectedItem as string);
+            return true;
         }
 
-        private void txtNotes_TextChanged(object sender, EventArgs e)
+        private string CollectAmenities()
         {
+            if (checkNone.Checked)
+            {
+                return "Khong co noi that";
+            }
 
+            List<string> amenities = new List<string>();
+            foreach (KeyValuePair<Guna2CheckBox, string> pair in amenityMap)
+            {
+                if (pair.Key.Checked)
+                {
+                    amenities.Add(pair.Value);
+                }
+            }
+
+            return string.Join(", ", amenities);
         }
 
-        private void lblRentPrice_Click(object sender, EventArgs e)
+        private void SetControlsReadOnly(bool readOnly)
         {
+            txtRoomCode.ReadOnly = true;
+            txtArea.ReadOnly = readOnly;
+            txtRentPrice.ReadOnly = readOnly;
+            txtNotes.ReadOnly = readOnly;
+            cmbStatus.Enabled = !readOnly;
+            checkNone.Enabled = !readOnly;
 
+            foreach (Guna2CheckBox checkbox in amenityMap.Keys)
+            {
+                checkbox.Enabled = !readOnly;
+            }
+
+            btnSave.Visible = !readOnly;
+            btnEdit.Text = readOnly ? "Edit" : "Cancel";
+            btnEdit.FillColor = readOnly ? Color.FromArgb(155, 89, 182) : Color.FromArgb(231, 76, 60);
         }
 
-        private void chkChair_CheckedChanged(object sender, EventArgs e)
+        private static string MapStatusToDisplay(RoomStatus status)
         {
-
+            switch (status)
+            {
+                case RoomStatus.Occupied:
+                    return "Dang thue";
+                case RoomStatus.Reserved:
+                    return "Du kien";
+                case RoomStatus.UnderRepair:
+                    return "Dang sua";
+                case RoomStatus.Maintenance:
+                    return "Bao tri";
+                default:
+                    return "Trong";
+            }
         }
 
-        private void lblRoomCode_Click(object sender, EventArgs e)
+        private static RoomStatus ParseStatus(string display)
         {
+            if (string.IsNullOrWhiteSpace(display))
+            {
+                return RoomStatus.Vacant;
+            }
 
+            string normalized = display.Trim().ToLowerInvariant();
+            if (normalized.Contains("thue"))
+            {
+                return RoomStatus.Occupied;
+            }
+
+            if (normalized.Contains("du") || normalized.Contains("kien"))
+            {
+                return RoomStatus.Reserved;
+            }
+
+            if (normalized.Contains("sua"))
+            {
+                return RoomStatus.UnderRepair;
+            }
+
+            if (normalized.Contains("bao") || normalized.Contains("tri"))
+            {
+                return RoomStatus.Maintenance;
+            }
+
+            return RoomStatus.Vacant;
         }
 
-        private void chkAirConditioner_CheckedChanged(object sender, EventArgs e)
+        private void AmenityCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-
+            if (checkNone.Checked)
+            {
+                checkNone.CheckedChanged -= CheckNone_CheckedChanged;
+                checkNone.Checked = false;
+                checkNone.CheckedChanged += CheckNone_CheckedChanged;
+            }
         }
 
-        private void txtNotes_TextChanged_1(object sender, EventArgs e)
+        private void CheckNone_CheckedChanged(object sender, EventArgs e)
         {
-
+            if (checkNone.Checked)
+            {
+                foreach (Guna2CheckBox checkbox in amenityMap.Keys)
+                {
+                    checkbox.CheckedChanged -= AmenityCheckBox_CheckedChanged;
+                    checkbox.Checked = false;
+                    checkbox.CheckedChanged += AmenityCheckBox_CheckedChanged;
+                }
+            }
         }
     }
 }
+
+

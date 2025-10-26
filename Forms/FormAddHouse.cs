@@ -1,116 +1,119 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using QLTN.Models;
+using QLTN.Services;
 
 namespace QLTN.Forms
 {
     public partial class FormAddHouse : Form
     {
+        private readonly HouseService houseService = new HouseService();
+
         public FormAddHouse()
         {
             InitializeComponent();
-            SetupEventHandlers();
-            ApplyCustomStyling();
+            ConfigureForm();
+            HookEvents();
         }
 
-        private void SetupEventHandlers()
+        private void ConfigureForm()
+        {
+            StartPosition = FormStartPosition.CenterParent;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            BackColor = Color.White;
+        }
+
+        private void HookEvents()
         {
             btnSave.Click += BtnSave_Click;
             btnReset.Click += BtnReset_Click;
         }
 
-        private void ApplyCustomStyling()
-        {
-            // Set form properties
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.FormBorderStyle = FormBorderStyle.Sizable; // Cho phép resize
-            this.MaximizeBox = true;
-            this.MinimizeBox = true;
-            this.MinimumSize = new Size(600, 500); // Kích thước tối thiểu
-            this.AutoScaleMode = AutoScaleMode.Dpi; // Cải thiện scaling
-            
-            // Set BackColor to prevent transparent background error
-            this.BackColor = Color.White;
-            
-            // Thêm event handler cho resize
-            this.Resize += FormAddHouse_Resize;
-        }
-        
-        private void FormAddHouse_Resize(object sender, EventArgs e)
-        {
-            // Đảm bảo form không bị thu nhỏ quá mức
-            if (this.Width < 600)
-            {
-                this.Width = 600;
-            }
-            if (this.Height < 500)
-            {
-                this.Height = 500;
-            }
-        }
-
         private void BtnSave_Click(object sender, EventArgs e)
         {
-            // Validate required fields
+            if (!ValidateInputs(out decimal? area, out int? floors, out int roomCount))
+            {
+                return;
+            }
+
+            House house = new House
+            {
+                Name = txtHouseName.Text.Trim(),
+                Address = txtAddress.Text.Trim(),
+                Area = area,
+                FloorCount = floors,
+                RoomCount = roomCount
+            };
+
+            try
+            {
+                houseService.CreateHouse(house);
+                MessageBox.Show("House created successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to save the new house.\nDetails: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private bool ValidateInputs(out decimal? area, out int? floors, out int roomCount)
+        {
+            area = null;
+            floors = null;
+            roomCount = 0;
+
             if (string.IsNullOrWhiteSpace(txtHouseName.Text))
             {
-                MessageBox.Show("Vui lòng nhập tên nhà!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please enter a house name.", "Missing data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtHouseName.Focus();
-                return;
+                return false;
             }
 
-            if (string.IsNullOrWhiteSpace(txtArea.Text))
+            if (string.IsNullOrWhiteSpace(txtAddress.Text))
             {
-                MessageBox.Show("Vui lòng nhập diện tích!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtArea.Focus();
-                return;
+                MessageBox.Show("Please enter an address.", "Missing data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtAddress.Focus();
+                return false;
             }
 
-            if (string.IsNullOrWhiteSpace(txtFloors.Text))
+            if (!string.IsNullOrWhiteSpace(txtArea.Text))
             {
-                MessageBox.Show("Vui lòng nhập số tầng!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtFloors.Focus();
-                return;
+                if (!decimal.TryParse(txtArea.Text, out decimal parsedArea) || parsedArea < 0)
+                {
+                    MessageBox.Show("Area must be a non-negative number.", "Invalid data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtArea.Focus();
+                    return false;
+                }
+
+                area = parsedArea;
             }
 
-            if (string.IsNullOrWhiteSpace(txtRooms.Text))
+            if (!string.IsNullOrWhiteSpace(txtFloors.Text))
             {
-                MessageBox.Show("Vui lòng nhập số phòng!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                if (!int.TryParse(txtFloors.Text, out int parsedFloors) || parsedFloors < 0)
+                {
+                    MessageBox.Show("Floor count must be a non-negative integer.", "Invalid data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtFloors.Focus();
+                    return false;
+                }
+
+                floors = parsedFloors;
+            }
+
+            if (!int.TryParse(txtRooms.Text, out roomCount) || roomCount < 0)
+            {
+                MessageBox.Show("Room count must be a non-negative integer.", "Invalid data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtRooms.Focus();
-                return;
+                return false;
             }
 
-            // Validate numeric fields
-            if (!decimal.TryParse(txtArea.Text, out decimal area))
-            {
-                MessageBox.Show("Diện tích phải là số!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtArea.Focus();
-                return;
-            }
-
-            if (!int.TryParse(txtFloors.Text, out int floors))
-            {
-                MessageBox.Show("Số tầng phải là số nguyên!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtFloors.Focus();
-                return;
-            }
-
-            if (!int.TryParse(txtRooms.Text, out int rooms))
-            {
-                MessageBox.Show("Số phòng phải là số nguyên!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtRooms.Focus();
-                return;
-            }
-
-            // Here you would typically save to database
-            MessageBox.Show("Thêm nhà thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            this.Close();
+            return true;
         }
 
         private void BtnReset_Click(object sender, EventArgs e)
@@ -120,6 +123,7 @@ namespace QLTN.Forms
             txtFloors.Clear();
             txtRooms.Clear();
             txtAddress.Clear();
+            txtHouseName.Focus();
         }
     }
 }

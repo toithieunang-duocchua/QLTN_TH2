@@ -1,167 +1,203 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using QLTN.Models;
+using QLTN.Services;
 
 namespace QLTN.Forms
 {
     public partial class FormRoom : Form
     {
-        private string houseName;
-        private string houseAddress;
+        private readonly House house;
+        private readonly RoomService roomService = new RoomService();
+        private readonly BindingSource roomBindingSource = new BindingSource();
+        private List<Room> rooms = new List<Room>();
 
-        public FormRoom(string houseName, string houseAddress)
+        public FormRoom(House house)
         {
-            this.houseName = houseName;
-            this.houseAddress = houseAddress;
+            this.house = house ?? throw new ArgumentNullException(nameof(house));
             InitializeComponent();
-            SetupEventHandlers();
-            ApplyCustomStyling();
+            ConfigureLayout();
+            HookEvents();
             LoadRoomData();
         }
 
-        private void SetupEventHandlers()
+        private void ConfigureLayout()
+        {
+            lblHouseName.Text = house.Name;
+            lblHouseAddress.Text = house.Address;
+
+            dataGridViewRooms.AutoGenerateColumns = false;
+            dataGridViewRooms.Columns.Clear();
+
+            dataGridViewRooms.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colCode",
+                HeaderText = "Ma phong",
+                DataPropertyName = nameof(Room.Code),
+                Width = 140
+            });
+
+            dataGridViewRooms.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colFloor",
+                HeaderText = "Tang",
+                DataPropertyName = nameof(Room.Floor),
+                Width = 80,
+                DefaultCellStyle = new DataGridViewCellStyle { Alignment = DataGridViewContentAlignment.MiddleCenter }
+            });
+
+            dataGridViewRooms.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colArea",
+                HeaderText = "Dien tich (m2)",
+                DataPropertyName = nameof(Room.Area),
+                Width = 120,
+                DefaultCellStyle = new DataGridViewCellStyle { Format = "0.##" }
+            });
+
+            dataGridViewRooms.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colRent",
+                HeaderText = "Gia thue (VND)",
+                DataPropertyName = nameof(Room.RentPrice),
+                Width = 160,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    Format = "N0",
+                    Alignment = DataGridViewContentAlignment.MiddleRight
+                }
+            });
+
+            dataGridViewRooms.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colStatus",
+                HeaderText = "Trang thai",
+                DataPropertyName = nameof(Room.Status),
+                Width = 140
+            });
+
+            DataGridViewButtonColumn actionColumn = new DataGridViewButtonColumn
+            {
+                Name = "colAction",
+                HeaderText = "Thao tac",
+                Text = "Xem chi tiet",
+                UseColumnTextForButtonValue = true,
+                Width = 120
+            };
+            dataGridViewRooms.Columns.Add(actionColumn);
+
+            dataGridViewRooms.DataSource = roomBindingSource;
+        }
+
+        private void HookEvents()
         {
             btnAddRoom.Click += BtnAddRoom_Click;
             btnBack.Click += BtnBack_Click;
-        }
-
-        private void ApplyCustomStyling()
-        {
-            // Set house information
-            lblHouseName.Text = houseName;
-            lblHouseAddress.Text = houseAddress;
-
-            // Configure DataGridView columns
-            ConfigureDataGridView();
-        }
-
-        private void ConfigureDataGridView()
-        {
-            // Set column headers
-            dataGridViewRooms.Columns[0].HeaderText = "Tên phòng";
-            dataGridViewRooms.Columns[1].HeaderText = "Trạng thái";
-            dataGridViewRooms.Columns[2].HeaderText = "Thao tác";
-
-            // Set column widths
-            dataGridViewRooms.Columns[0].Width = 200;
-            dataGridViewRooms.Columns[1].Width = 150;
-            dataGridViewRooms.Columns[2].Width = 100;
-
-            // Configure button column
-            DataGridViewButtonColumn buttonColumn = dataGridViewRooms.Columns[2] as DataGridViewButtonColumn;
-            if (buttonColumn != null)
-            {
-                buttonColumn.Text = "Xem thông tin";
-                buttonColumn.UseColumnTextForButtonValue = true;
-            }
-
-            // Style the DataGridView
-            dataGridViewRooms.DefaultCellStyle.Font = new Font("Segoe UI", 10);
-            dataGridViewRooms.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            dataGridViewRooms.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(52, 73, 94);
-            dataGridViewRooms.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            dataGridViewRooms.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            
-            // Row styling
-            dataGridViewRooms.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 249, 250);
-            dataGridViewRooms.DefaultCellStyle.SelectionBackColor = Color.FromArgb(52, 152, 219);
-            dataGridViewRooms.DefaultCellStyle.SelectionForeColor = Color.White;
+            dataGridViewRooms.CellFormatting += DataGridViewRooms_CellFormatting;
         }
 
         private void LoadRoomData()
         {
-            // Clear existing data
-            dataGridViewRooms.Rows.Clear();
-
-            // Sample room data
-            var rooms = new List<object[]>
+            try
             {
-                new object[] { "Phòng 101", "Còn trống", "Xem thông tin" },
-                new object[] { "Phòng 102", "Đang thuê", "Xem thông tin" },
-                new object[] { "Phòng 103", "Còn trống", "Xem thông tin" },
-                new object[] { "Phòng 201", "Còn trống", "Xem thông tin" },
-                new object[] { "Phòng 202", "Đang thuê", "Xem thông tin" },
-                new object[] { "Phòng 301", "Còn trống", "Xem thông tin" }
-            };
-
-            // Add rows to DataGridView
-            foreach (var room in rooms)
+                rooms = new List<Room>(roomService.GetRoomsByHouse(house.Id));
+            }
+            catch (Exception ex)
             {
-                dataGridViewRooms.Rows.Add(room);
+                MessageBox.Show($"Khong the tai danh sach phong.{Environment.NewLine}Chi tiet: {ex.Message}",
+                    "Loi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
-            // Color code status column
-            foreach (DataGridViewRow row in dataGridViewRooms.Rows)
+            roomBindingSource.DataSource = rooms;
+            roomBindingSource.ResetBindings(false);
+        }
+
+        private void DataGridViewRooms_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (dataGridViewRooms.Columns[e.ColumnIndex].Name != "colStatus")
             {
-                if (row.Cells[1].Value?.ToString() == "Còn trống")
+                return;
+            }
+
+            if (e.Value is RoomStatus status)
+            {
+                switch (status)
                 {
-                    row.Cells[1].Style.ForeColor = Color.FromArgb(46, 204, 113); // Green
-                }
-                else if (row.Cells[1].Value?.ToString() == "Đang thuê")
-                {
-                    row.Cells[1].Style.ForeColor = Color.FromArgb(231, 76, 60); // Red
+                    case RoomStatus.Occupied:
+                        e.Value = "Dang thue";
+                        e.CellStyle.ForeColor = Color.FromArgb(231, 76, 60);
+                        break;
+                    case RoomStatus.Reserved:
+                        e.Value = "Du kien";
+                        e.CellStyle.ForeColor = Color.FromArgb(243, 156, 18);
+                        break;
+                    case RoomStatus.UnderRepair:
+                        e.Value = "Dang sua";
+                        e.CellStyle.ForeColor = Color.FromArgb(155, 89, 182);
+                        break;
+                    case RoomStatus.Maintenance:
+                        e.Value = "Bao tri";
+                        e.CellStyle.ForeColor = Color.FromArgb(230, 126, 34);
+                        break;
+                    default:
+                        e.Value = "Trong";
+                        e.CellStyle.ForeColor = Color.FromArgb(46, 204, 113);
+                        break;
                 }
             }
         }
 
         private void BtnAddRoom_Click(object sender, EventArgs e)
         {
-            // Navigate to add room form
-            FormMainSystem mainForm = Application.OpenForms.OfType<FormMainSystem>().FirstOrDefault();
-            if (mainForm != null)
+            using (FormAddRoom addRoom = new FormAddRoom(house))
             {
-            // Temporarily disabled FormAddRoom
-            MessageBox.Show("Chức năng thêm phòng tạm thời bị vô hiệu hóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            
-            /* FormAddRoom formAddRoom = new FormAddRoom();
-            formAddRoom.TopLevel = false;
-            formAddRoom.FormBorderStyle = FormBorderStyle.None;
-            formAddRoom.Dock = DockStyle.Fill;
-
-            mainForm.LoadFormIntoMainPanel(formAddRoom); */
+                if (addRoom.ShowDialog(this) == DialogResult.OK)
+                {
+                    LoadRoomData();
+                }
             }
         }
 
         private void BtnBack_Click(object sender, EventArgs e)
         {
-            // Navigate back to house management
             FormMainSystem mainForm = Application.OpenForms.OfType<FormMainSystem>().FirstOrDefault();
-            if (mainForm != null)
+            if (mainForm == null)
             {
-                FormHouseManagement formHouseManagement = new FormHouseManagement();
-                formHouseManagement.TopLevel = false;
-                formHouseManagement.FormBorderStyle = FormBorderStyle.None;
-                formHouseManagement.Dock = DockStyle.Fill;
-
-                mainForm.LoadFormIntoMainPanel(formHouseManagement);
+                return;
             }
+
+            FormHouseManagement formHouseManagement = new FormHouseManagement
+            {
+                TopLevel = false,
+                FormBorderStyle = FormBorderStyle.None,
+                Dock = DockStyle.Fill
+            };
+
+            mainForm.LoadFormIntoMainPanel(formHouseManagement);
         }
 
-        private void dataGridViewRooms_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void DataGridViewRooms_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Handle button column clicks
-            if (e.ColumnIndex == 2 && e.RowIndex >= 0) // Action column
+            if (e.RowIndex < 0 || dataGridViewRooms.Columns[e.ColumnIndex].Name != "colAction")
             {
-                string roomName = dataGridViewRooms.Rows[e.RowIndex].Cells[0].Value?.ToString();
-                if (!string.IsNullOrEmpty(roomName))
-                {
-                    // Navigate to room detail form
-                    FormMainSystem mainForm = Application.OpenForms.OfType<FormMainSystem>().FirstOrDefault();
-                    if (mainForm != null)
-                    {
-                        FormInfRoom formInfRoom = new FormInfRoom(roomName);
-                        formInfRoom.TopLevel = false;
-                        formInfRoom.FormBorderStyle = FormBorderStyle.None;
-                        formInfRoom.Dock = DockStyle.Fill;
+                return;
+            }
 
-                        mainForm.LoadFormIntoMainPanel(formInfRoom);
-                    }
+            Room room = roomBindingSource[e.RowIndex] as Room;
+            if (room == null)
+            {
+                return;
+            }
+
+            using (FormInfRoom roomDetail = new FormInfRoom(room))
+            {
+                if (roomDetail.ShowDialog(this) == DialogResult.OK)
+                {
+                    LoadRoomData();
                 }
             }
         }

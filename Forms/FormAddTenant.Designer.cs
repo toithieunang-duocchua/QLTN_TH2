@@ -43,6 +43,7 @@
             this.lblSubtitle = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
             this.btnRefresh = new Guna.UI2.WinForms.Guna2Button();
+            this.btnSave = new Guna.UI2.WinForms.Guna2Button();
             this.lblFullName = new System.Windows.Forms.Label();
             this.txtFullName = new Guna.UI2.WinForms.Guna2TextBox();
             this.lblPhone = new System.Windows.Forms.Label();
@@ -75,6 +76,7 @@
             // panelContent
             // 
             this.panelContent.BackColor = System.Drawing.Color.White;
+            this.panelContent.Controls.Add(this.btnSave);
             this.panelContent.Controls.Add(this.btnRefresh);
             this.panelContent.Controls.Add(this.cmbRoom);
             this.panelContent.Controls.Add(this.panelRight);
@@ -280,6 +282,24 @@
             this.btnRefresh.Text = "Làm mới";
             this.btnRefresh.Click += new System.EventHandler(this.BtnRefresh_Click);
             // 
+            // btnSave
+            // 
+            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSave.BorderRadius = 8;
+            this.btnSave.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnSave.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnSave.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnSave.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnSave.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(132)))), ((int)(((byte)(255)))));
+            this.btnSave.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.btnSave.ForeColor = System.Drawing.Color.White;
+            this.btnSave.Location = new System.Drawing.Point(535, 597);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(180, 50);
+            this.btnSave.TabIndex = 10;
+            this.btnSave.Text = "Lưu";
+            this.btnSave.Click += new System.EventHandler(this.BtnSave_Click);
+            // 
             // lblFullName
             // 
             this.lblFullName.AutoSize = true;
@@ -407,7 +427,6 @@
             this.lblNotes.Size = new System.Drawing.Size(84, 28);
             this.lblNotes.TabIndex = 7;
             this.lblNotes.Text = "Ghi chú";
-            this.lblNotes.Click += new System.EventHandler(this.lblNotes_Click);
             // 
             // txtNotes
             // 
@@ -468,6 +487,7 @@
         private System.Windows.Forms.Label lblSubtitle;
         private System.Windows.Forms.Label lblTitle;
         private Guna.UI2.WinForms.Guna2Button btnRefresh;
+        private Guna.UI2.WinForms.Guna2Button btnSave;
         private Guna.UI2.WinForms.Guna2ComboBox cmbRoom;
         private Guna.UI2.WinForms.Guna2TextBox txtFullName;
         private System.Windows.Forms.Label lblNotes;

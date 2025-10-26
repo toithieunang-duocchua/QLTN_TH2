@@ -59,10 +59,6 @@
             this.dataGridViewRooms.BackgroundColor = System.Drawing.Color.White;
             this.dataGridViewRooms.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dataGridViewRooms.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewRooms.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-                new System.Windows.Forms.DataGridViewTextBoxColumn(),
-                new System.Windows.Forms.DataGridViewTextBoxColumn(),
-                new System.Windows.Forms.DataGridViewButtonColumn()});
             this.dataGridViewRooms.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewRooms.GridColor = System.Drawing.Color.FromArgb(240, 240, 240);
             this.dataGridViewRooms.Location = new System.Drawing.Point(20, 20);
@@ -73,7 +69,7 @@
             this.dataGridViewRooms.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridViewRooms.Size = new System.Drawing.Size(1160, 580);
             this.dataGridViewRooms.TabIndex = 0;
-            this.dataGridViewRooms.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewRooms_CellClick);
+            this.dataGridViewRooms.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridViewRooms_CellClick);
             // 
             // panelHeader
             // 
@@ -97,7 +93,7 @@
             this.lblHouseName.Name = "lblHouseName";
             this.lblHouseName.Size = new System.Drawing.Size(85, 32);
             this.lblHouseName.TabIndex = 0;
-            this.lblHouseName.Text = "Nhà A";
+            this.lblHouseName.Text = "Nha A";
             // 
             // lblHouseAddress
             // 
@@ -108,7 +104,7 @@
             this.lblHouseAddress.Name = "lblHouseAddress";
             this.lblHouseAddress.Size = new System.Drawing.Size(200, 19);
             this.lblHouseAddress.TabIndex = 1;
-            this.lblHouseAddress.Text = "19 Nguyễn Thị Thập, Quận 7";
+            this.lblHouseAddress.Text = "19 Nguyen Thi Thap, Quan 7";
             // 
             // btnAddRoom
             // 
@@ -122,7 +118,7 @@
             this.btnAddRoom.Name = "btnAddRoom";
             this.btnAddRoom.Size = new System.Drawing.Size(120, 40);
             this.btnAddRoom.TabIndex = 2;
-            this.btnAddRoom.Text = "Thêm phòng";
+            this.btnAddRoom.Text = "Them phong";
             this.btnAddRoom.UseVisualStyleBackColor = false;
             this.btnAddRoom.Click += new System.EventHandler(this.BtnAddRoom_Click);
             // 
@@ -138,7 +134,7 @@
             this.btnBack.Name = "btnBack";
             this.btnBack.Size = new System.Drawing.Size(120, 40);
             this.btnBack.TabIndex = 3;
-            this.btnBack.Text = "Quay lại";
+            this.btnBack.Text = "Quay lai";
             this.btnBack.UseVisualStyleBackColor = false;
             this.btnBack.Click += new System.EventHandler(this.BtnBack_Click);
             // 
@@ -151,7 +147,7 @@
             this.Controls.Add(this.panelContent);
             this.Controls.Add(this.panelHeader);
             this.Name = "FormRoom";
-            this.Text = "Quản lý phòng";
+            this.Text = "Quan ly phong";
             this.panelContent.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewRooms)).EndInit();
             this.panelHeader.ResumeLayout(false);

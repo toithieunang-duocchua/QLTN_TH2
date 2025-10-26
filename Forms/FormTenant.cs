@@ -1,169 +1,397 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using QLTN.Models;
+using QLTN.Services;
 
 namespace QLTN.Forms
 {
     public partial class FormTenant : Form
     {
+        private readonly TenantService tenantService = new TenantService();
+        private readonly BindingSource tenantBindingSource = new BindingSource();
+        private readonly Dictionary<string, string> fingerprintCache = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> contractCache = new Dictionary<string, string>();
+        private List<Tenant> tenants = new List<Tenant>();
+        private bool suppressFilterEvent;
+
         public FormTenant()
         {
             InitializeComponent();
-            SetupForm();
+            ConfigureGrid();
+            dataGridViewTenants.DataSource = tenantBindingSource;
+            Load += FormTenant_Load;
+        }
+
+        private void FormTenant_Load(object sender, EventArgs e)
+        {
             LoadTenantData();
-            ApplyCustomStyling();
         }
 
-        private void SetupForm()
+        private void ConfigureGrid()
         {
-            // Set form properties
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.MaximizeBox = true;
-            this.MinimizeBox = true;
-            this.MinimumSize = new Size(1000, 600);
-            this.AutoScaleMode = AutoScaleMode.Dpi;
-            
-            // Set BackColor to prevent transparent background error
-            this.BackColor = Color.FromArgb(248, 249, 250);
-        }
+            dataGridViewTenants.AutoGenerateColumns = false;
 
-        private void ApplyCustomStyling()
-        {
-            // DataGridView styling - clean and simple
-            dataGridViewTenants.DefaultCellStyle.Font = new Font("Segoe UI", 10);
-            dataGridViewTenants.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            TenantNameColumn.DataPropertyName = nameof(Tenant.FullName);
+            RoomColumn.DataPropertyName = nameof(Tenant.RoomCode);
+            PhoneColumn.DataPropertyName = nameof(Tenant.PhoneNumber);
+            FingerprintColumn.DataPropertyName = nameof(Tenant.FingerprintStatus);
+            ContractColumn.DataPropertyName = nameof(Tenant.ContractStatus);
+
+            dataGridViewTenants.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            dataGridViewTenants.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(70, 70, 80);
+            dataGridViewTenants.ColumnHeadersDefaultCellStyle.BackColor = Color.White;
+            dataGridViewTenants.DefaultCellStyle.Font = new Font("Segoe UI", 10F);
+            dataGridViewTenants.DefaultCellStyle.ForeColor = Color.FromArgb(55, 55, 65);
+            dataGridViewTenants.DefaultCellStyle.SelectionBackColor = Color.FromArgb(230, 235, 255);
+            dataGridViewTenants.DefaultCellStyle.SelectionForeColor = Color.FromArgb(55, 55, 65);
+            dataGridViewTenants.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 249, 250);
+
             dataGridViewTenants.EnableHeadersVisualStyles = false;
-            dataGridViewTenants.ColumnHeadersDefaultCellStyle.BackColor = Color.White; // Clean white
-            dataGridViewTenants.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black; // Black text
-            dataGridViewTenants.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewTenants.AlternatingRowsDefaultCellStyle.BackColor = Color.White; // No alternating colors
-            dataGridViewTenants.DefaultCellStyle.BackColor = Color.White; // All rows white
-            dataGridViewTenants.BackgroundColor = Color.White; // Grid background white
-            
-            // Change selection color to light gray
-            dataGridViewTenants.DefaultCellStyle.SelectionBackColor = Color.FromArgb(240, 240, 240); // Light gray
-            dataGridViewTenants.DefaultCellStyle.SelectionForeColor = Color.Black; // Black text when selected
-
-            // Column setup
-            dataGridViewTenants.Columns[0].HeaderText = "Tên người thuê";
-            dataGridViewTenants.Columns[0].Width = 400;
-            dataGridViewTenants.Columns[0].SortMode = DataGridViewColumnSortMode.NotSortable; // No sorting arrow
-
-            dataGridViewTenants.Columns[1].HeaderText = "Phòng";
-            dataGridViewTenants.Columns[1].Width = 200;
-            dataGridViewTenants.Columns[1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewTenants.Columns[1].SortMode = DataGridViewColumnSortMode.NotSortable; // No sorting arrow
-
-            DataGridViewLinkColumn linkColumn = dataGridViewTenants.Columns[2] as DataGridViewLinkColumn;
-            if (linkColumn != null)
-            {
-                linkColumn.HeaderText = "Chức năng";
-                linkColumn.Text = "Xem";
-                linkColumn.Width = 150;
-                linkColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                linkColumn.LinkColor = Color.Black; // Black text instead of blue
-                linkColumn.VisitedLinkColor = Color.Black; // Keep black when visited
-                linkColumn.ActiveLinkColor = Color.Black; // Keep black when clicked
-                linkColumn.DefaultCellStyle.SelectionBackColor = Color.FromArgb(240, 240, 240); // Light gray selection
-                linkColumn.DefaultCellStyle.SelectionForeColor = Color.Black; // Black text when selected
-                linkColumn.SortMode = DataGridViewColumnSortMode.NotSortable; // No sorting arrow
-            }
         }
 
         private void LoadTenantData()
         {
-            // Clear existing data
-            dataGridViewTenants.Rows.Clear();
+            try
+            {
+                tenants = new List<Tenant>(tenantService.GetTenantSummaries());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"KhÃ´ng thá»ƒ táº£i danh sÃ¡ch ngÆ°á»i thuÃª.\nChi tiáº¿t: {ex.Message}",
+                    "Lá»—i", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            // Sample data
-            AddTenantToGrid("Nguyễn Văn A", "A101");
-            AddTenantToGrid("Trần Thị B", "A102");
-            AddTenantToGrid("Phạm Quang C", "B203");
-            AddTenantToGrid("Lê Thị D", "A201");
-            AddTenantToGrid("Hoàng Văn E", "B101");
+            PopulateRoomFilter();
+            ApplyFilters();
         }
 
-        private void AddTenantToGrid(string tenantName, string roomNumber)
+        private void PopulateRoomFilter()
         {
-            int rowIndex = dataGridViewTenants.Rows.Add(tenantName, roomNumber, "Xem");
-            DataGridViewRow row = dataGridViewTenants.Rows[rowIndex];
+            suppressFilterEvent = true;
+            cmbRoomFilter.Items.Clear();
+            cmbRoomFilter.Items.Add("Táº¥t cáº£ phÃ²ng");
 
-            // Keep everything clean and simple - no special styling
-            if (row.Cells[1] != null)
+            IEnumerable<string> rooms = tenants
+                .Select(t => t.RoomCode)
+                .Where(code => !string.IsNullOrWhiteSpace(code))
+                .Distinct()
+                .OrderBy(code => code);
+
+            foreach (string room in rooms)
             {
-                row.Cells[1].Style.BackColor = Color.White; // Keep white background
-                row.Cells[1].Style.ForeColor = Color.Black; // Black text
-                row.Cells[1].Style.Font = new Font("Segoe UI", 10); // Normal font
+                cmbRoomFilter.Items.Add(room);
             }
-            
-            // Ensure the link cell shows "Xem" text with black color
-            if (row.Cells[2] != null)
+
+            if (cmbRoomFilter.Items.Count > 0)
             {
-                row.Cells[2].Value = "Xem";
-                row.Cells[2].Style.ForeColor = Color.Black; // Black text instead of blue
+                cmbRoomFilter.SelectedIndex = 0;
             }
+
+            suppressFilterEvent = false;
+        }
+
+        private void ApplyFilters()
+        {
+            string keyword = txtSearch.Text.Trim().ToLowerInvariant();
+            string selectedRoom = cmbRoomFilter.SelectedItem as string ?? string.Empty;
+            bool allRooms = string.IsNullOrEmpty(selectedRoom) || selectedRoom.Equals("Táº¥t cáº£ phÃ²ng", StringComparison.OrdinalIgnoreCase);
+
+            IEnumerable<Tenant> filtered = tenants.Where(t =>
+            {
+                bool matchRoom = allRooms || string.Equals(t.RoomCode, selectedRoom, StringComparison.OrdinalIgnoreCase);
+                if (!matchRoom)
+                {
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(keyword))
+                {
+                    return true;
+                }
+
+                return (!string.IsNullOrEmpty(t.FullName) && t.FullName.ToLowerInvariant().Contains(keyword))
+                       || (!string.IsNullOrEmpty(t.RoomCode) && t.RoomCode.ToLowerInvariant().Contains(keyword))
+                       || (!string.IsNullOrEmpty(t.PhoneNumber) && t.PhoneNumber.ToLowerInvariant().Contains(keyword));
+            }).ToList();
+
+            tenantBindingSource.DataSource = filtered.ToList();
+            tenantBindingSource.ResetBindings(false);
+        }
+
+        private void TxtSearch_TextChanged(object sender, EventArgs e)
+        {
+            ApplyFilters();
+        }
+
+        private void CmbRoomFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (suppressFilterEvent)
+            {
+                return;
+            }
+
+            ApplyFilters();
         }
 
         private void BtnAddTenant_Click(object sender, EventArgs e)
         {
-            // Load FormAddTenant into main panel
-            FormMainSystem mainForm = Application.OpenForms.OfType<FormMainSystem>().FirstOrDefault();
-            if (mainForm != null)
+            using (FormAddTenant addTenant = new FormAddTenant())
             {
-                FormAddTenant formAddTenant = new FormAddTenant();
-                formAddTenant.TopLevel = false;
-                formAddTenant.FormBorderStyle = FormBorderStyle.None;
-                formAddTenant.Dock = DockStyle.Fill;
-
-                mainForm.LoadFormIntoMainPanel(formAddTenant);
+                if (addTenant.ShowDialog(this) == DialogResult.OK)
+                {
+                    LoadTenantData();
+                }
             }
         }
 
-
-        private void TxtSearch_TextChanged(object sender, EventArgs e)
+        private void DataGridViewTenants_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Implement search functionality
-            string searchText = txtSearch.Text.ToLower();
-            
-            foreach (DataGridViewRow row in dataGridViewTenants.Rows)
+            if (e.RowIndex < 0)
             {
-                bool visible = false;
-                
-                if (row.Cells[0].Value != null && row.Cells[0].Value.ToString().ToLower().Contains(searchText))
-                {
-                    visible = true;
-                }
-                else if (row.Cells[1].Value != null && row.Cells[1].Value.ToString().ToLower().Contains(searchText))
-                {
-                    visible = true;
-                }
-                
-                row.Visible = visible;
+                return;
+            }
+
+            Tenant tenant = tenantBindingSource[e.RowIndex] as Tenant;
+            if (tenant == null)
+            {
+                return;
+            }
+
+            string contractInfo = tenant.ContractStart.HasValue && tenant.ContractEnd.HasValue
+                ? $"{tenant.ContractStart:dd/MM/yyyy} - {tenant.ContractEnd:dd/MM/yyyy}"
+                : "ChÆ°a cáº­p nháº­t";
+
+            MessageBox.Show(
+                $"Há» tÃªn: {tenant.FullName}\n" +
+                $"Äiá»‡n thoáº¡i: {tenant.PhoneNumber}\n" +
+                $"Email: {tenant.Email}\n" +
+                $"PhÃ²ng: {tenant.RoomCode}\n" +
+                $"Há»£p Ä‘á»“ng: {tenant.ContractNumber}\n" +
+                $"Thá»i háº¡n: {contractInfo}",
+                "ThÃ´ng tin ngÆ°á»i thuÃª",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        private void DataGridViewTenants_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0)
+            {
+                return;
+            }
+
+            Tenant tenant = tenantBindingSource[e.RowIndex] as Tenant;
+            if (tenant == null)
+            {
+                return;
+            }
+
+            DataGridViewColumn column = dataGridViewTenants.Columns[e.ColumnIndex];
+
+            if (column == FingerprintColumn)
+            {
+                string label = NormalizeFingerprintStatus(tenant);
+                e.Value = label;
+                e.FormattingApplied = true;
+            }
+            else if (column == ContractColumn)
+            {
+                string label = NormalizeContractStatus(tenant);
+                e.Value = label;
+                e.FormattingApplied = true;
             }
         }
 
-        private void DataGridViewTenants_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void DataGridViewTenants_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
-            // Handle link column clicks
-            if (e.ColumnIndex == 2 && e.RowIndex >= 0) // Action column
+            if (e.RowIndex < 0)
             {
-                string tenantName = dataGridViewTenants.Rows[e.RowIndex].Cells[0].Value?.ToString();
-                string roomNumber = dataGridViewTenants.Rows[e.RowIndex].Cells[1].Value?.ToString();
-                
-                if (!string.IsNullOrEmpty(tenantName))
+                return;
+            }
+
+            DataGridViewColumn column = dataGridViewTenants.Columns[e.ColumnIndex];
+            if (column != FingerprintColumn && column != ContractColumn)
+            {
+                return;
+            }
+
+            string text = Convert.ToString(e.FormattedValue) ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            Color background = column == FingerprintColumn
+                ? GetFingerprintColor(text)
+                : GetContractColor(text);
+
+            Color foreground = Color.White;
+
+            PaintStatusChip(e, text, background, foreground);
+        }
+
+        private void PaintStatusChip(DataGridViewCellPaintingEventArgs e, string text, Color background, Color foreground)
+        {
+            e.PaintBackground(e.ClipBounds, true);
+
+            Rectangle bounds = e.CellBounds;
+            bounds.Inflate(-10, -14);
+
+            using (GraphicsPath path = CreateRoundedRectangle(bounds, 18))
+            using (SolidBrush backBrush = new SolidBrush(background))
+            using (SolidBrush textBrush = new SolidBrush(foreground))
+            using (StringFormat format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                e.Graphics.FillPath(backBrush, path);
+                e.Graphics.DrawString(text, new Font("Segoe UI Semibold", 9F, FontStyle.Bold), textBrush, bounds, format);
+            }
+
+            e.Handled = true;
+        }
+
+        private static GraphicsPath CreateRoundedRectangle(Rectangle bounds, int radius)
+        {
+            GraphicsPath path = new GraphicsPath();
+            int diameter = radius * 2;
+
+            Rectangle arc = new Rectangle(bounds.Location, new Size(diameter, diameter));
+            path.AddArc(arc, 180, 90);
+
+            arc.X = bounds.Right - diameter;
+            path.AddArc(arc, 270, 90);
+
+            arc.Y = bounds.Bottom - diameter;
+            path.AddArc(arc, 0, 90);
+
+            arc.X = bounds.Left;
+            path.AddArc(arc, 90, 90);
+
+            path.CloseFigure();
+            return path;
+        }
+
+                private string NormalizeFingerprintStatus(Tenant tenant)
+        {
+            string raw = tenant.FingerprintStatus;
+            if (!string.IsNullOrWhiteSpace(raw))
+            {
+                raw = raw.Trim();
+                if (fingerprintCache.TryGetValue(raw, out string cached))
                 {
-                    // Show tenant details
-                    MessageBox.Show($"Thông tin người thuê:\n\nTên: {tenantName}\nPhòng: {roomNumber}", 
-                        "Chi tiết người thuê", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return cached;
                 }
             }
+
+            string label;
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                label = "Chưa lấy (0/?)";
+            }
+            else
+            {
+                string normalized = raw.ToLowerInvariant();
+                if (normalized.Contains("hoan") || normalized.Contains("đã lấy") || normalized.Contains("da lay"))
+                {
+                    label = "Hoàn tất (2/2)";
+                }
+                else if (normalized.Contains("chua du") || normalized.Contains("đang lấy") || normalized.Contains("dang lay"))
+                {
+                    label = "Chưa đủ (1/2)";
+                }
+                else
+                {
+                    label = raw;
+                }
+            }
+
+            fingerprintCache[raw ?? string.Empty] = label;
+            return label;
+        }
+
+        private string NormalizeContractStatus(Tenant tenant)
+        {
+            string raw = tenant.ContractStatus;
+            if (!string.IsNullOrWhiteSpace(raw))
+            {
+                raw = raw.Trim();
+                if (contractCache.TryGetValue(raw, out string cached))
+                {
+                    return cached;
+                }
+            }
+
+            string label;
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                label = "Chưa có";
+            }
+            else
+            {
+                string normalized = raw.ToLowerInvariant();
+                if (normalized.Contains("dang hieu") || normalized.Contains("đang thuê") || normalized.Contains("dang thue"))
+                {
+                    label = "Còn hiệu lực";
+                }
+                else if (normalized.Contains("sap") || normalized.Contains("sắp"))
+                {
+                    label = "Sắp hết hạn";
+                }
+                else if (normalized.Contains("het") || normalized.Contains("hết"))
+                {
+                    label = "Hết hạn";
+                }
+                else
+                {
+                    label = raw;
+                }
+            }
+
+            contractCache[raw ?? string.Empty] = label;
+            return label;
+        }
+private static Color GetFingerprintColor(string label)
+        {
+            string normalized = label.ToLowerInvariant();
+            if (normalized.Contains("hoÃ n") || normalized.Contains("hoan"))
+            {
+                return Color.FromArgb(76, 175, 80);
+            }
+
+            if (normalized.Contains("Ä‘á»§") || normalized.Contains("du"))
+            {
+                return Color.FromArgb(242, 153, 74);
+            }
+
+            return Color.FromArgb(231, 76, 60);
+        }
+
+        private static Color GetContractColor(string label)
+        {
+            string normalized = label.ToLowerInvariant();
+            if (normalized.Contains("cÃ²n") || normalized.Contains("con"))
+            {
+                return Color.FromArgb(46, 204, 113);
+            }
+
+            if (normalized.Contains("sáº¯p") || normalized.Contains("sap"))
+            {
+                return Color.FromArgb(243, 156, 18);
+            }
+
+            if (normalized.Contains("háº¿t") || normalized.Contains("het"))
+            {
+                return Color.FromArgb(231, 76, 60);
+            }
+
+            return Color.FromArgb(99, 110, 114);
         }
     }
 }
+
+

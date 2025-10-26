@@ -105,7 +105,6 @@ namespace QLTN.Forms
             this.txtNotes.SelectedText = "";
             this.txtNotes.Size = new System.Drawing.Size(707, 246);
             this.txtNotes.TabIndex = 3;
-            this.txtNotes.TextChanged += new System.EventHandler(this.txtNotes_TextChanged_1);
             // 
             // lblNotes
             // 
@@ -282,7 +281,6 @@ namespace QLTN.Forms
             this.chkAirConditioner.UncheckedState.BorderRadius = 0;
             this.chkAirConditioner.UncheckedState.BorderThickness = 1;
             this.chkAirConditioner.UncheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
-            this.chkAirConditioner.CheckedChanged += new System.EventHandler(this.chkAirConditioner_CheckedChanged);
             // 
             // chkWashingMachine
             // 
@@ -503,7 +501,6 @@ namespace QLTN.Forms
             this.btnBack.Size = new System.Drawing.Size(160, 49);
             this.btnBack.TabIndex = 6;
             this.btnBack.Text = "Quay lại";
-            this.btnBack.Click += new System.EventHandler(this.BtnBack_Click);
             // 
             // lblTitle
             // 

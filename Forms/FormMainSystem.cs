@@ -1,8 +1,8 @@
-using QLTN.Forms;
 using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using QLTN.Services;
 
 namespace QLTN.Forms
 {
@@ -11,14 +11,15 @@ namespace QLTN.Forms
         private static readonly Size TargetFormSize = new Size(1024, 576);
         string path = Path.Combine(Application.StartupPath, "Assets", "logo.png");
 
-
         private Panel sidebar, mainPanel, topPanel;
+        private readonly ContractMonitorService contractMonitor = new ContractMonitorService();
 
         public FormMainSystem()
         {
             InitializeComponent();
             SetupForm();
             LoadWpfControl();
+            contractMonitor.Start();
         }
 
         private void LoadWpfControl()
@@ -300,5 +301,10 @@ namespace QLTN.Forms
             ResumeLayout(false);
         }
 
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            contractMonitor.Dispose();
+        }
     }
 }

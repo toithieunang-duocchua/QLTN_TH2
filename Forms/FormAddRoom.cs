@@ -1,138 +1,197 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Guna.UI2.WinForms;
+using QLTN.Models;
+using QLTN.Services;
 
 namespace QLTN.Forms
 {
     public partial class FormAddRoom : Form
     {
-        public FormAddRoom()
+        private readonly House house;
+        private readonly RoomService roomService = new RoomService();
+        private readonly Dictionary<Guna2CheckBox, string> amenityMap = new Dictionary<Guna2CheckBox, string>();
+
+        public FormAddRoom(House house)
         {
+            this.house = house ?? throw new ArgumentNullException(nameof(house));
             InitializeComponent();
-            SetupForm();
+            ConfigureForm();
+            HookEvents();
+            InitializeAmenities();
         }
 
-        private void SetupForm()
+        private void ConfigureForm()
         {
-            // Set form properties
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.FormBorderStyle = FormBorderStyle.Sizable; // Cho phép resize
-            this.MaximizeBox = true;
-            this.MinimizeBox = true;
-            this.MinimumSize = new Size(700, 600); // Kích thước tối thiểu
-            this.AutoScaleMode = AutoScaleMode.Dpi; // Cải thiện scaling
-            
-            // Set BackColor to prevent transparent background error
-            this.BackColor = Color.White;
-            
-            // Thêm event handler cho resize
-            this.Resize += FormAddRoom_Resize;
-            
-            // Set default values
-            cmbStatus.SelectedIndex = 0; // "Trống"
+            StartPosition = FormStartPosition.CenterParent;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            BackColor = System.Drawing.Color.White;
+
+            lblTitle.Text = $"Them phong moi cho {house.Name}";
+            cmbStatus.Items.Clear();
+            cmbStatus.Items.AddRange(new object[] { "Trong", "Dang thue", "Du kien", "Dang sua", "Bao tri" });
+            cmbStatus.SelectedIndex = 0;
         }
-        
-        private void FormAddRoom_Resize(object sender, EventArgs e)
+
+        private void HookEvents()
         {
-            // Đảm bảo form không bị thu nhỏ quá mức
-            if (this.Width < 700)
+            btnSave.Click += BtnSave_Click;
+            btnCancel.Click += (s, _) => Close();
+            btnBack.Click += (s, _) => Close();
+        }
+
+        private void InitializeAmenities()
+        {
+            amenityMap.Add(chkRefrigerator, "Tu lanh");
+            amenityMap.Add(chkAirConditioner, "May lanh");
+            amenityMap.Add(chkWashingMachine, "May giat");
+            amenityMap.Add(chkTable, "Ban");
+            amenityMap.Add(chkWardrobe, "Tu ao");
+            amenityMap.Add(chkChair, "Ghe");
+
+            chkNoFurniture.CheckedChanged += (s, _) =>
             {
-                this.Width = 700;
-            }
-            if (this.Height < 600)
+                if (chkNoFurniture.Checked)
+                {
+                    foreach (Guna2CheckBox checkbox in amenityMap.Keys)
+                    {
+                        checkbox.Checked = false;
+                    }
+                }
+            };
+
+            foreach (Guna2CheckBox checkbox in amenityMap.Keys)
             {
-                this.Height = 600;
+                checkbox.CheckedChanged += (s, _) =>
+                {
+                    if (checkbox.Checked)
+                    {
+                        chkNoFurniture.Checked = false;
+                    }
+                };
             }
         }
 
         private void BtnSave_Click(object sender, EventArgs e)
         {
-            // Validate input
+            if (!ValidateInputs(out double? area, out decimal rentPrice, out RoomStatus status))
+            {
+                return;
+            }
+
+            Room room = new Room
+            {
+                HouseId = house.Id,
+                HouseCode = house.Code,
+                Code = txtRoomCode.Text.Trim(),
+                Area = area,
+                RentPrice = rentPrice,
+                Status = status,
+                Amenities = CollectAmenities(),
+                Notes = txtNotes.Text.Trim()
+            };
+
+            try
+            {
+                roomService.CreateRoom(room);
+                MessageBox.Show("Room created successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Unable to create room.\nDetails: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private bool ValidateInputs(out double? area, out decimal rentPrice, out RoomStatus status)
+        {
+            area = null;
+            rentPrice = 0;
+            status = RoomStatus.Vacant;
+
             if (string.IsNullOrWhiteSpace(txtRoomCode.Text))
             {
-                MessageBox.Show("Vui lòng nhập mã phòng!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please enter a room code.", "Missing data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtRoomCode.Focus();
-                return;
+                return false;
             }
 
-            if (string.IsNullOrWhiteSpace(txtArea.Text))
+            if (!string.IsNullOrWhiteSpace(txtArea.Text))
             {
-                MessageBox.Show("Vui lòng nhập diện tích!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtArea.Focus();
-                return;
+                if (!double.TryParse(txtArea.Text, out double parsedArea) || parsedArea < 0)
+                {
+                    MessageBox.Show("Area must be a non-negative number.", "Invalid data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtArea.Focus();
+                    return false;
+                }
+
+                area = parsedArea;
             }
 
-            if (string.IsNullOrWhiteSpace(txtRentPrice.Text))
+            if (!decimal.TryParse(txtRentPrice.Text, out rentPrice) || rentPrice < 0)
             {
-                MessageBox.Show("Vui lòng nhập giá thuê!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Rent must be a non-negative number.", "Invalid data", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtRentPrice.Focus();
-                return;
+                return false;
             }
 
-            // Get furniture list
-            List<string> furnitureList = new List<string>();
-            if (chkRefrigerator.Checked) furnitureList.Add("Tủ lạnh");
-            if (chkAirConditioner.Checked) furnitureList.Add("Máy lạnh");
-            if (chkWashingMachine.Checked) furnitureList.Add("Máy giặt");
-            if (chkTable.Checked) furnitureList.Add("Bàn");
-            if (chkWardrobe.Checked) furnitureList.Add("Tủ áo quần");
-            if (chkChair.Checked) furnitureList.Add("Ghế");
-            if (chkNoFurniture.Checked) furnitureList.Add("Không có nội thất");
-
-            // Prepare data for saving
-            string roomCode = txtRoomCode.Text.Trim();
-            string area = txtArea.Text.Trim();
-            string rentPrice = txtRentPrice.Text.Trim();
-            string status = cmbStatus.SelectedItem?.ToString() ?? "Trống";
-            string notes = txtNotes.Text.Trim();
-            string furniture = string.Join(", ", furnitureList);
-
-            // Here you would typically save to database
-            // For now, just show a success message
-            MessageBox.Show($"Đã thêm phòng thành công!\n\n" +
-                           $"Mã phòng: {roomCode}\n" +
-                           $"Diện tích: {area} m²\n" +
-                           $"Giá thuê: {rentPrice} VNĐ/tháng\n" +
-                           $"Trạng thái: {status}\n" +
-                           $"Nội thất: {furniture}\n" +
-                           $"Ghi chú: {notes}", 
-                           "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            // Close the form
-            this.Close();
+            status = ParseStatus(cmbStatus.SelectedItem as string);
+            return true;
         }
 
-        private void BtnCancel_Click(object sender, EventArgs e)
+        private string CollectAmenities()
         {
-            // Ask for confirmation before closing
-            DialogResult result = MessageBox.Show("Bạn có chắc chắn muốn hủy? Tất cả dữ liệu sẽ bị mất!", 
-                "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            
-            if (result == DialogResult.Yes)
+            if (chkNoFurniture.Checked)
             {
-                this.Close();
+                return "Khong co noi that";
             }
+
+            List<string> amenities = new List<string>();
+            foreach (KeyValuePair<Guna2CheckBox, string> pair in amenityMap)
+            {
+                if (pair.Key.Checked)
+                {
+                    amenities.Add(pair.Value);
+                }
+            }
+
+            return string.Join(", ", amenities);
         }
 
-        private void BtnBack_Click(object sender, EventArgs e)
+        private static RoomStatus ParseStatus(string display)
         {
-            // Navigate back to room management
-            FormMainSystem mainForm = Application.OpenForms.OfType<FormMainSystem>().FirstOrDefault();
-            if (mainForm != null)
+            if (string.IsNullOrWhiteSpace(display))
             {
-                FormRoom formRoom = new FormRoom("Nhà A", "19 Nguyễn Thị Thập, Quận 7"); // Default values
-                formRoom.TopLevel = false;
-                formRoom.FormBorderStyle = FormBorderStyle.None;
-                formRoom.Dock = DockStyle.Fill;
-
-                mainForm.LoadFormIntoMainPanel(formRoom);
+                return RoomStatus.Vacant;
             }
+
+            string normalized = display.Trim().ToLowerInvariant();
+            if (normalized.Contains("thue"))
+            {
+                return RoomStatus.Occupied;
+            }
+
+            if (normalized.Contains("du") || normalized.Contains("kien"))
+            {
+                return RoomStatus.Reserved;
+            }
+
+            if (normalized.Contains("sua"))
+            {
+                return RoomStatus.UnderRepair;
+            }
+
+            if (normalized.Contains("bao") || normalized.Contains("tri"))
+            {
+                return RoomStatus.Maintenance;
+            }
+
+            return RoomStatus.Vacant;
         }
     }
 }

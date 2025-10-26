@@ -495,7 +495,6 @@ namespace QLTN.Forms
             this.btnCancel.Size = new System.Drawing.Size(160, 49);
             this.btnCancel.TabIndex = 7;
             this.btnCancel.Text = "Hủy";
-            this.btnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
             // 
             // btnBack
             // 
@@ -513,7 +512,6 @@ namespace QLTN.Forms
             this.btnBack.Size = new System.Drawing.Size(160, 49);
             this.btnBack.TabIndex = 6;
             this.btnBack.Text = "Quay lại";
-            this.btnBack.Click += new System.EventHandler(this.BtnBack_Click);
             // 
             // lblTitle
             // 

@@ -83,6 +83,24 @@
     <Compile Include="Controls\TransitionHostPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Forms\ActivityLog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ActivityLog.Designer.cs">
+      <DependentUpon>ActivityLog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ChangePasswordForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ChangePasswordForm.Designer.cs">
+      <DependentUpon>ChangePasswordForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormAccount.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormAccount.Designer.cs">
+      <DependentUpon>FormAccount.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\FormForgotPassword.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -216,6 +234,21 @@
     <Compile Include="Models\House.cs" />
     <Compile Include="Models\Room.cs" />
     <Compile Include="Models\Tenant.cs" />
+    <Compile Include="qltnDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>qltnDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="qltnDataSet1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>qltnDataSet1.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="qltnDataSet2.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>qltnDataSet2.xsd</DependentUpon>
+    </Compile>
     <Compile Include="Services\EmailVerificationService.cs" />
     <Compile Include="Services\AuditLogger.cs" />
     <Compile Include="Services\ApplicationManager.cs" />
@@ -232,6 +265,15 @@
     <Compile Include="Utilities\EmailValidator.cs" />
     <Compile Include="Utilities\InputSanitizer.cs" />
     <Compile Include="Utilities\PasswordHasher.cs" />
+    <EmbeddedResource Include="Forms\ActivityLog.resx">
+      <DependentUpon>ActivityLog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ChangePasswordForm.resx">
+      <DependentUpon>ChangePasswordForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormAccount.resx">
+      <DependentUpon>FormAccount.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormRegister.resx">
       <DependentUpon>FormRegister.cs</DependentUpon>
     </EmbeddedResource>
@@ -259,6 +301,9 @@
     <EmbeddedResource Include="Forms\FormMainSystem.resx">
       <DependentUpon>FormMainSystem.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MainAccountForm.resx">
+      <DependentUpon>MainAccountForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -278,6 +323,39 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="qltnDataSet.xsc">
+      <DependentUpon>qltnDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="qltnDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>qltnDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="qltnDataSet.xss">
+      <DependentUpon>qltnDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="qltnDataSet1.xsc">
+      <DependentUpon>qltnDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="qltnDataSet1.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>qltnDataSet1.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="qltnDataSet1.xss">
+      <DependentUpon>qltnDataSet1.xsd</DependentUpon>
+    </None>
+    <None Include="qltnDataSet2.xsc">
+      <DependentUpon>qltnDataSet2.xsd</DependentUpon>
+    </None>
+    <None Include="qltnDataSet2.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>qltnDataSet2.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="qltnDataSet2.xss">
+      <DependentUpon>qltnDataSet2.xsd</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

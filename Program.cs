@@ -21,7 +21,7 @@ namespace QLTN
             
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
+
             // Khởi chạy ứng dụng với ApplicationManager
             //ApplicationManager.StartApplication();
             Application.Run(new FormMainSystem());

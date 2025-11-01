@@ -188,7 +188,7 @@ namespace QLTN.Forms
             AddSidebarButton("\uf15c", "Hợp đồng", (s, e) => AuthNavigationManager.LoadWinForm<MainContractsForm>());
             AddSidebarButton("\uf15c", "Quản lý phương tiện", (s, e) => ShowMessage("Quản lý phương tiện"));
             AddSidebarButton("\uf555", "Tài chính", (s, e) => ShowMessage("Tài chính"));
-            AddSidebarButton("\uf53a", "Thanh Toán", (s, e) => ShowMessage("Thanh Toán"));
+            AddSidebarButton("\uf53a", "Thanh Toán", (s, e) => AuthNavigationManager.LoadWinForm<FormPayment>());
             AddSidebarButton("\uf201", "Báo cáo && Thống kê", (s, e) => ShowMessage("Báo cáo & Thống kê"));
             AddSidebarButton("\uf071", "Quản lý sự cố", (s, e) => ShowMessage("Quản lý sự cố"));
             AddSidebarButton("\uf007", "Accounts", (s, e) => AuthNavigationManager.LoadWinForm<FormAccount>());
